@@ -1,33 +1,38 @@
 # Laravel Cookie Consent
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/jeffersongoncalves/laravel-cookieconsent.svg?style=flat-square)](https://packagist.org/packages/jeffersongoncalves/laravel-cookieconsent)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/jeffersongoncalves/laravel-cookieconsent/run-tests.yml?branch=master&label=tests&style=flat-square)](https://github.com/jeffersongoncalves/laravel-cookieconsent/actions?query=workflow%3Arun-tests+branch%3Amaster)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/jeffersongoncalves/laravel-cookieconsent/fix-php-code-style-issues.yml?branch=master&label=code%20style&style=flat-square)](https://github.com/jeffersongoncalves/laravel-cookieconsent/actions?query=workflow%3A"Fix+PHP+code+styling"+branch%3Amaster)
-[![Total Downloads](https://img.shields.io/packagist/dt/jeffersongoncalves/laravel-cookieconsent.svg?style=flat-square)](https://packagist.org/packages/jeffersongoncalves/laravel-cookieconsent)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/jeffersongoncalves/laravel-cookie-consent.svg?style=flat-square)](https://packagist.org/packages/jeffersongoncalves/laravel-cookie-consent)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/jeffersongoncalves/laravel-cookie-consent/run-tests.yml?branch=master&label=tests&style=flat-square)](https://github.com/jeffersongoncalves/laravel-cookie-consent/actions?query=workflow%3Arun-tests+branch%3Amaster)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/jeffersongoncalves/laravel-cookie-consent/fix-php-code-style-issues.yml?branch=master&label=code%20style&style=flat-square)](https://github.com/jeffersongoncalves/laravel-cookie-consent/actions?query=workflow%3A"Fix+PHP+code+styling"+branch%3Amaster)
+[![Total Downloads](https://img.shields.io/packagist/dt/jeffersongoncalves/laravel-cookie-consent.svg?style=flat-square)](https://packagist.org/packages/jeffersongoncalves/laravel-cookie-consent)
 
-
-This Laravel package automatically logs the currently logged-in user's ID to the `created_by`, `updated_by`, `deleted_by`, and `restored_by` fields of your Eloquent models. It also automatically timestamps the `restored_at` field when a model is restored. This simplifies the tracking of data modifications and provides valuable auditing capabilities. The package is easy to install and configure, seamlessly integrating with your existing Laravel application.
+This Laravel package provides a simple and elegant way to implement cookie consent on your website, ensuring compliance with privacy regulations like GDPR and CCPA. It offers a clean and customizable interface, allowing you to easily manage and display cookie consent banners and preferences.
 
 ## Installation
 
 You can install the package via composer:
 
 ```bash
-composer require jeffersongoncalves/laravel-cookieconsent
+composer require jeffersongoncalves/laravel-cookie-consent
 ```
 
 ## Usage
 
+Publish config file.
+
+```bash
+php artisan vendor:publish --tag=cookie-consent-config
+```
+
 Add head template.
 
-```bladehtml
-
+```php
+@include('cookie-consent::cookie-consent-head')
 ```
 
 Add body template.
 
-```bladehtml
-
+```php
+@include('cookie-consent::cookie-consent-body')
 ```
 
 ## Testing

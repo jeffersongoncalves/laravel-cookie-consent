@@ -1,12 +1,12 @@
 {
-    "name": "jeffersongoncalves/laravel-cookieconsent",
-    "description": "This Laravel package automatically logs the currently logged-in user's ID to the `created_by`, `updated_by`, `deleted_by`, and `restored_by` fields of your Eloquent models. It also automatically timestamps the `restored_at` field when a model is restored. This simplifies the tracking of data modifications and provides valuable auditing capabilities. The package is easy to install and configure, seamlessly integrating with your existing Laravel application.",
+    "name": "jeffersongoncalves/laravel-cookie-consent",
+    "description": "This Laravel package provides a simple and elegant way to implement cookie consent on your website, ensuring compliance with privacy regulations like GDPR and CCPA. It offers a clean and customizable interface, allowing you to easily manage and display cookie consent banners and preferences.",
     "keywords": [
         "jeffersongoncalves",
         "laravel",
-        "laravel-cookieconsent"
+        "laravel-cookie-consent"
     ],
-    "homepage": "https://github.com/jeffersongoncalves/laravel-cookieconsent",
+    "homepage": "https://github.com/jeffersongoncalves/laravel-cookie-consent",
     "license": "MIT",
     "authors": [
         {
