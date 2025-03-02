@@ -3,20 +3,20 @@
     window.cookieconsent.initialise({
         "palette": {
             "popup": {
-                "background": "{{ config('cookieconsent.palette.popup.background') }}",
-                "text": "{{ config('cookieconsent.palette.popup.text') }}"
+                "background": "{{ config('cookie-consent.palette.popup.background') }}",
+                "text": "{{ config('cookie-consent.palette.popup.text') }}"
             },
             "button": {
-                "background": "{{ config('cookieconsent.palette.button.background') }}",
-                "text": "{{ config('cookieconsent.palette.button.text') }}"
+                "background": "{{ config('cookie-consent.palette.button.background') }}",
+                "text": "{{ config('cookie-consent.palette.button.text') }}"
             }
         },
-        "position": "{{ config('cookieconsent.position') }}",
+        "position": "{{ config('cookie-consent.position') }}",
         "content": {
-            "message": "{{ config('cookieconsent.content.message') }}",
-            "dismiss": "{{ config('cookieconsent.content.dismiss') }}",
-            "link": "{{ config('cookieconsent.content.link') }}",
-            "href": "{{ config('cookieconsent.content.href') }}"
+            "message": "{{ config('cookie-consent.content.message') }}",
+            "dismiss": "{{ config('cookie-consent.content.dismiss') }}",
+            "link": "{{ config('cookie-consent.content.link') }}",
+            "href": "{{ config('cookie-consent.content.href') }}"
         }
     });
 </script>
