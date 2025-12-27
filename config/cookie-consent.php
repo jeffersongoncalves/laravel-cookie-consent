@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'css' => 'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css',
+    'js' => 'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js',
     'content' => [
         'href' => null,
         'close' => '&#x274c;',

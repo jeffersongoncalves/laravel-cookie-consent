@@ -1,4 +1,5 @@
-<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+<script src="{{ config('cookie-consent.js', 'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js') }}"
+        data-cfasync="false"></script>
 <script>
     window.cookieconsent.initialise({
         "palette": {

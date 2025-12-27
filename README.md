@@ -58,6 +58,8 @@ You can customize the appearance and behavior of the cookie consent banner by ed
 
 ```php
 return [
+    'css' => 'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css',
+    'js' => 'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js',
     'content' => [
         'href' => null,
         'close' => '&#x274c;',
@@ -140,6 +142,8 @@ Please see [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
 Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
 
 ## Credits
+
+This package uses the [Osano CookieConsent](https://github.com/osano/cookieconsent) plugin.
 
 - [Jèfferson Gonçalves](https://github.com/jeffersongoncalves)
 - [All Contributors](../../contributors)
