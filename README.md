@@ -28,6 +28,18 @@ Publish config file.
 php artisan vendor:publish --tag=cookie-consent-config
 ```
 
+Publish views (optional).
+
+```bash
+php artisan vendor:publish --tag=cookie-consent-views
+```
+
+Publish translations (optional).
+
+```bash
+php artisan vendor:publish --tag=cookie-consent-translations
+```
+
 Add head template.
 
 ```php
@@ -38,6 +50,67 @@ Add body template.
 
 ```php
 @include('cookie-consent::cookie-consent-body')
+```
+
+## Configuration
+
+You can customize the appearance and behavior of the cookie consent banner by editing the `config/cookie-consent.php` file.
+
+```php
+return [
+    'content' => [
+        'href' => null,
+        'close' => '&#x274c;',
+    ],
+    'palette' => [
+        'popup' => [
+            'background' => '#696969',
+            'text' => '#FFFFFF',
+            'link' => '#FFFFFF',
+        ],
+        'button' => [
+            'background' => 'transparent',
+            'border' => '#f8e71c',
+            'text' => '#f8e71c',
+        ],
+        'highlight' => [
+            'background' => '#f8e71c',
+            'border' => '#f8e71c',
+            'text' => '#000000',
+        ],
+    ],
+    'position' => 'bottom-left', // top-left, top-right, bottom-left, bottom-right
+    'theme' => 'block', // block, edgeless, classic
+];
+```
+
+## Translations
+
+This package supports multiple languages. The following languages are currently available:
+
+- Arabic (`ar`)
+- Czech (`cs`)
+- German (`de`)
+- English (`en`)
+- Spanish (`es`)
+- Persian (`fa`)
+- French (`fr`)
+- Hebrew (`he`)
+- Indonesian (`id`)
+- Italian (`it`)
+- Japanese (`ja`)
+- Dutch (`nl`)
+- Polish (`pl`)
+- Portuguese (`pt`)
+- Portuguese (Brazil) (`pt_BR`)
+- Portuguese (Portugal) (`pt_PT`)
+- Slovak (`sk`)
+- Turkish (`tr`)
+
+If you want to customize the translations, you can publish the language files:
+
+```bash
+php artisan vendor:publish --tag=cookie-consent-translations
 ```
 
 ## Testing
