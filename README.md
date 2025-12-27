@@ -84,6 +84,14 @@ return [
 ];
 ```
 
+### Position
+
+| Top Left | Top Right |
+| :---: | :---: |
+| ![Top Left](screenshots/cookie-consent-top-left.png) | ![Top Right](screenshots/cookie-consent-top-right.png) |
+| **Bottom Left** | **Bottom Right** |
+| ![Bottom Left](screenshots/cookie-consent-bottom-left.png) | ![Bottom Right](screenshots/cookie-consent-bottom-right.png) |
+
 ## Translations
 
 This package supports multiple languages. The following languages are currently available:
