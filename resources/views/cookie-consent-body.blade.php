@@ -20,8 +20,6 @@
         },
         "position": "{{ config('cookie-consent.position') }}",
         "theme": "{{ config('cookie-consent.theme') }}",
-        "revokable": {{ config('cookie-consent.revokable') }},
-        "location": {{ config('cookie-consent.location') }},
         "content": {
             "header": "{{ __('cookie-consent::default.header') }}",
             "message": "{{ __('cookie-consent::default.message') }}",

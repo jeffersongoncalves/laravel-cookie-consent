@@ -24,10 +24,4 @@ return [
     ],
     'position' => 'bottom-left', // top-left, top-right, bottom-left, bottom-right
     'theme' => 'block', // block, edgeless, classic
-    'revokable' => 'false',
-    'location' => 'true',
-    'law' => [
-        'countryCode' => 'null', // null, true, false
-        'regionalLaw' => 'false', // true, false
-    ],
 ];
