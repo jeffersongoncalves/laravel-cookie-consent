@@ -3,7 +3,7 @@
 return [
     'content' => [
         'href' => null,
-        'close' => "&#x274c;",
+        'close' => '&#x274c;',
     ],
     'palette' => [
         'popup' => [
