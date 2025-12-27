@@ -2,20 +2,32 @@
 
 return [
     'content' => [
-        'message' => 'This website uses cookies and other tracking technologies to assist with navigation, monitor site usage and web traffic, assist with our promotions and marketing, and personalize and improve our services and websites, as set forth in our',
-        'dismiss' => 'Accept',
-        'link' => 'Privacy Policy',
         'href' => null,
+        'close' => "&#x274c;",
     ],
     'palette' => [
         'popup' => [
             'background' => '#696969',
             'text' => '#FFFFFF',
+            'link' => '#FFFFFF',
         ],
         'button' => [
-            'background' => '#FFAB00',
-            'text' => '#FFFFFF',
+            'background' => 'transparent',
+            'border' => '#f8e71c',
+            'text' => '#f8e71c',
+        ],
+        'highlight' => [
+            'background' => '#f8e71c',
+            'border' => '#f8e71c',
+            'text' => '#000000',
         ],
     ],
-    'position' => 'bottom-left',
+    'position' => 'bottom-left', // top-left, top-right, bottom-left, bottom-right
+    'theme' => 'block', // block, edgeless, classic
+    'revokable' => 'false',
+    'location' => 'true',
+    'law' => [
+        'countryCode' => 'null', // null, true, false
+        'regionalLaw' => 'false', // true, false
+    ],
 ];

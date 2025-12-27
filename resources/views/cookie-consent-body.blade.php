@@ -4,19 +4,35 @@
         "palette": {
             "popup": {
                 "background": "{{ config('cookie-consent.palette.popup.background') }}",
+                "link": "{{ config('cookie-consent.palette.popup.link') }}",
                 "text": "{{ config('cookie-consent.palette.popup.text') }}"
             },
             "button": {
                 "background": "{{ config('cookie-consent.palette.button.background') }}",
+                "border": "{{ config('cookie-consent.palette.button.border') }}",
                 "text": "{{ config('cookie-consent.palette.button.text') }}"
+            },
+            "highlight": {
+                "background": "{{ config('cookie-consent.palette.highlight.background') }}",
+                "border": "{{ config('cookie-consent.palette.highlight.border') }}",
+                "text": "{{ config('cookie-consent.palette.highlight.text') }}"
             }
         },
         "position": "{{ config('cookie-consent.position') }}",
+        "theme": "{{ config('cookie-consent.theme') }}",
+        "revokable": {{ config('cookie-consent.revokable') }},
+        "location": {{ config('cookie-consent.location') }},
         "content": {
-            "message": "{{ config('cookie-consent.content.message') }}",
-            "dismiss": "{{ config('cookie-consent.content.dismiss') }}",
-            "link": "{{ config('cookie-consent.content.link') }}",
-            "href": "{{ config('cookie-consent.content.href') }}"
+            "header": "{{ __('cookie-consent::default.header') }}",
+            "message": "{{ __('cookie-consent::default.message') }}",
+            "dismiss": "{{ __('cookie-consent::default.dismiss') }}",
+            "allow": "{{ __('cookie-consent::default.allow') }}",
+            "deny": "{{ __('cookie-consent::default.deny') }}",
+            "link": "{{ __('cookie-consent::default.link') }}",
+            "href": "{{ config('cookie-consent.content.href') }}",
+            "close": "{{ config('cookie-consent.content.close') }}",
+            "target": "{{ __('cookie-consent::default.target') }}",
+            "policy": "{{ __('cookie-consent::default.policy') }}"
         }
     });
 </script>
