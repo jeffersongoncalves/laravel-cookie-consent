@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.0.0 - 2026-02-23
+
+### Breaking Changes
+
+- **All content fields migrated from translation files to `spatie/laravel-settings`**
+  - Removed all 18 translation files (`resources/lang/`)
+  - Removed `hasTranslations()` from ServiceProvider
+  - Content text (header, message, dismiss, allow, deny, link, target, policy) is now managed via database settings with English defaults
+  
+
+### New Settings Properties
+
+| Property | Default |
+|----------|---------|
+| `content_header` | Cookies used on the website! |
+| `content_message` | This website uses cookies to ensure you get the best experience on our website. |
+| `content_dismiss` | Got it! |
+| `content_allow` | Allow cookies |
+| `content_deny` | Decline |
+| `content_link` | Learn more |
+| `content_target` | _blank |
+| `content_policy` | Cookie Policy |
+
+### Upgrade Guide
+
+1. Run `php artisan migrate` to add the new settings fields
+2. If you had customized translations, update the content via the settings table or a Filament settings page
+3. Remove any published translation files from your app's `lang/vendor/cookie-consent/` directory
+
 ## v2.0.0 - 2026-02-22
 
 ### Breaking Changes
@@ -16,11 +45,13 @@ All notable changes to this project will be documented in this file.
    ```bash
    composer require jeffersongoncalves/laravel-cookie-consent:^2.0
    
+   
    ```
 2. Run migrations to create the settings in the database:
    
    ```bash
    php artisan migrate
+   
    
    ```
 3. Delete your old `config/cookie-consent.php` file (no longer used).
@@ -32,6 +63,7 @@ All notable changes to this project will be documented in this file.
    $settings->position = 'top-right';
    $settings->popup_background = '#000000';
    $settings->save();
+   
    
    ```
 
