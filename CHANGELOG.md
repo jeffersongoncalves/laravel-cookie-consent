@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.0.1 - 2026-02-23
+
+### Changes
+
+- Remove translations section from README
+- Add all content settings properties to the available settings table in README
+
 ## v3.0.0 - 2026-02-23
 
 ### Breaking Changes
@@ -46,11 +53,13 @@ All notable changes to this project will be documented in this file.
    composer require jeffersongoncalves/laravel-cookie-consent:^2.0
    
    
+   
    ```
 2. Run migrations to create the settings in the database:
    
    ```bash
    php artisan migrate
+   
    
    
    ```
@@ -63,6 +72,7 @@ All notable changes to this project will be documented in this file.
    $settings->position = 'top-right';
    $settings->popup_background = '#000000';
    $settings->save();
+   
    
    
    ```
