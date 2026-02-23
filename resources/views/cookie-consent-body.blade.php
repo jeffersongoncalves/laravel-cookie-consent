@@ -23,16 +23,16 @@
         "position": "{{ $settings->position }}",
         "theme": "{{ $settings->theme }}",
         "content": {
-            "header": "{{ __('cookie-consent::default.header') }}",
-            "message": "{{ __('cookie-consent::default.message') }}",
-            "dismiss": "{{ __('cookie-consent::default.dismiss') }}",
-            "allow": "{{ __('cookie-consent::default.allow') }}",
-            "deny": "{{ __('cookie-consent::default.deny') }}",
-            "link": "{{ __('cookie-consent::default.link') }}",
+            "header": "{{ $settings->content_header }}",
+            "message": "{{ $settings->content_message }}",
+            "dismiss": "{{ $settings->content_dismiss }}",
+            "allow": "{{ $settings->content_allow }}",
+            "deny": "{{ $settings->content_deny }}",
+            "link": "{{ $settings->content_link }}",
             "href": "{{ $settings->content_href }}",
             "close": "{{ $settings->content_close }}",
-            "target": "{{ __('cookie-consent::default.target') }}",
-            "policy": "{{ __('cookie-consent::default.policy') }}"
+            "target": "{{ $settings->content_target }}",
+            "policy": "{{ $settings->content_policy }}"
         }
     });
 </script>
