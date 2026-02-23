@@ -20,12 +20,24 @@ You can install the package via composer:
 composer require jeffersongoncalves/laravel-cookie-consent
 ```
 
-## Usage
-
-Publish config file.
+Run the migrations to create the settings in the database:
 
 ```bash
-php artisan vendor:publish --tag=cookie-consent-config
+php artisan migrate
+```
+
+## Usage
+
+Add head template.
+
+```php
+@include('cookie-consent::cookie-consent-head')
+```
+
+Add body template.
+
+```php
+@include('cookie-consent::cookie-consent-body')
 ```
 
 Publish views (optional).
@@ -40,51 +52,59 @@ Publish translations (optional).
 php artisan vendor:publish --tag=cookie-consent-translations
 ```
 
-Add head template.
+Publish settings migrations (optional).
 
-```php
-@include('cookie-consent::cookie-consent-head')
-```
-
-Add body template.
-
-```php
-@include('cookie-consent::cookie-consent-body')
+```bash
+php artisan vendor:publish --tag=cookie-consent-settings-migrations
 ```
 
 ## Configuration
 
-You can customize the appearance and behavior of the cookie consent banner by editing the `config/cookie-consent.php` file.
+All settings are stored in the database using [spatie/laravel-settings](https://github.com/spatie/laravel-settings). You can access and modify them at runtime using the `CookieConsentSettings` class or the `cookie_consent_settings()` helper.
+
+### Accessing settings
 
 ```php
-return [
-    'css' => 'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css',
-    'js' => 'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js',
-    'content' => [
-        'href' => null,
-        'close' => '&#x274c;',
-    ],
-    'palette' => [
-        'popup' => [
-            'background' => '#696969',
-            'text' => '#FFFFFF',
-            'link' => '#FFFFFF',
-        ],
-        'button' => [
-            'background' => 'transparent',
-            'border' => '#f8e71c',
-            'text' => '#f8e71c',
-        ],
-        'highlight' => [
-            'background' => '#f8e71c',
-            'border' => '#f8e71c',
-            'text' => '#000000',
-        ],
-    ],
-    'position' => 'bottom-left', // top-left, top-right, bottom-left, bottom-right
-    'theme' => 'block', // block, edgeless, classic
-];
+use JeffersonGoncalves\CookieConsent\Settings\CookieConsentSettings;
+
+// Via helper
+$settings = cookie_consent_settings();
+
+// Via container
+$settings = app(CookieConsentSettings::class);
+
+// Read a value
+$position = $settings->position;
 ```
+
+### Updating settings
+
+```php
+$settings = cookie_consent_settings();
+$settings->position = 'top-right';
+$settings->popup_background = '#000000';
+$settings->save();
+```
+
+### Available settings
+
+| Property | Type | Default |
+|----------|------|---------|
+| `css_url` | `string` | `https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css` |
+| `js_url` | `string` | `https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js` |
+| `content_href` | `?string` | `null` |
+| `content_close` | `string` | `&#x274c;` |
+| `popup_background` | `string` | `#696969` |
+| `popup_text` | `string` | `#FFFFFF` |
+| `popup_link` | `string` | `#FFFFFF` |
+| `button_background` | `string` | `transparent` |
+| `button_border` | `string` | `#f8e71c` |
+| `button_text` | `string` | `#f8e71c` |
+| `highlight_background` | `string` | `#f8e71c` |
+| `highlight_border` | `string` | `#f8e71c` |
+| `highlight_text` | `string` | `#000000` |
+| `position` | `string` | `bottom-left` |
+| `theme` | `string` | `block` |
 
 ### Position
 

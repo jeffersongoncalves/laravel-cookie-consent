@@ -1,26 +1,27 @@
-<script src="{{ config('cookie-consent.js', 'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js') }}"
+@php($settings = cookie_consent_settings())
+<script src="{{ $settings->js_url }}"
         data-cfasync="false"></script>
 <script>
     window.cookieconsent.initialise({
         "palette": {
             "popup": {
-                "background": "{{ config('cookie-consent.palette.popup.background') }}",
-                "link": "{{ config('cookie-consent.palette.popup.link') }}",
-                "text": "{{ config('cookie-consent.palette.popup.text') }}"
+                "background": "{{ $settings->popup_background }}",
+                "link": "{{ $settings->popup_link }}",
+                "text": "{{ $settings->popup_text }}"
             },
             "button": {
-                "background": "{{ config('cookie-consent.palette.button.background') }}",
-                "border": "{{ config('cookie-consent.palette.button.border') }}",
-                "text": "{{ config('cookie-consent.palette.button.text') }}"
+                "background": "{{ $settings->button_background }}",
+                "border": "{{ $settings->button_border }}",
+                "text": "{{ $settings->button_text }}"
             },
             "highlight": {
-                "background": "{{ config('cookie-consent.palette.highlight.background') }}",
-                "border": "{{ config('cookie-consent.palette.highlight.border') }}",
-                "text": "{{ config('cookie-consent.palette.highlight.text') }}"
+                "background": "{{ $settings->highlight_background }}",
+                "border": "{{ $settings->highlight_border }}",
+                "text": "{{ $settings->highlight_text }}"
             }
         },
-        "position": "{{ config('cookie-consent.position') }}",
-        "theme": "{{ config('cookie-consent.theme') }}",
+        "position": "{{ $settings->position }}",
+        "theme": "{{ $settings->theme }}",
         "content": {
             "header": "{{ __('cookie-consent::default.header') }}",
             "message": "{{ __('cookie-consent::default.message') }}",
@@ -28,8 +29,8 @@
             "allow": "{{ __('cookie-consent::default.allow') }}",
             "deny": "{{ __('cookie-consent::default.deny') }}",
             "link": "{{ __('cookie-consent::default.link') }}",
-            "href": "{{ config('cookie-consent.content.href') }}",
-            "close": "{{ config('cookie-consent.content.close') }}",
+            "href": "{{ $settings->content_href }}",
+            "close": "{{ $settings->content_close }}",
             "target": "{{ __('cookie-consent::default.target') }}",
             "policy": "{{ __('cookie-consent::default.policy') }}"
         }
