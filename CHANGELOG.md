@@ -2,6 +2,69 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.0.0 - 2026-02-22
+
+### Breaking Changes
+
+- Configuration migrated from `config/cookie-consent.php` to database via [spatie/laravel-settings](https://github.com/spatie/laravel-settings)
+- The config file has been removed. All settings are now stored in the database.
+
+### Migration Guide
+
+1. Update the package:
+   
+   ```bash
+   composer require jeffersongoncalves/laravel-cookie-consent:^2.0
+   
+   ```
+2. Run migrations to create the settings in the database:
+   
+   ```bash
+   php artisan migrate
+   
+   ```
+3. Delete your old `config/cookie-consent.php` file (no longer used).
+   
+4. If you had custom values in the config file, update them via code:
+   
+   ```php
+   $settings = cookie_consent_settings();
+   $settings->position = 'top-right';
+   $settings->popup_background = '#000000';
+   $settings->save();
+   
+   ```
+
+### What's New
+
+- **Dynamic configuration** - All settings stored in database, changeable at runtime
+- **Settings class** - `CookieConsentSettings` with 15 typed properties for type-safe access
+- **Helper function** - `cookie_consent_settings()` for convenient access in views and code
+- **Settings migration** - All defaults match previous config file values
+- **Publishable migrations** - `--tag=cookie-consent-settings-migrations`
+
+### Available Settings
+
+| Property | Type | Default |
+|----------|------|---------|
+| `css_url` | `string` | CDN cookieconsent CSS |
+| `js_url` | `string` | CDN cookieconsent JS |
+| `content_href` | `?string` | `null` |
+| `content_close` | `string` | `&#x274c;` |
+| `popup_background` | `string` | `#696969` |
+| `popup_text` | `string` | `#FFFFFF` |
+| `popup_link` | `string` | `#FFFFFF` |
+| `button_background` | `string` | `transparent` |
+| `button_border` | `string` | `#f8e71c` |
+| `button_text` | `string` | `#f8e71c` |
+| `highlight_background` | `string` | `#f8e71c` |
+| `highlight_border` | `string` | `#f8e71c` |
+| `highlight_text` | `string` | `#000000` |
+| `position` | `string` | `bottom-left` |
+| `theme` | `string` | `block` |
+
+**Full Changelog**: https://github.com/jeffersongoncalves/laravel-cookie-consent/compare/v1.1.1...v2.0.0
+
 ## v1.2.0 - 2025-12-27
 
 ### What's Changed
