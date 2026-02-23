@@ -46,12 +46,6 @@ Publish views (optional).
 php artisan vendor:publish --tag=cookie-consent-views
 ```
 
-Publish translations (optional).
-
-```bash
-php artisan vendor:publish --tag=cookie-consent-translations
-```
-
 Publish settings migrations (optional).
 
 ```bash
@@ -92,8 +86,16 @@ $settings->save();
 |----------|------|---------|
 | `css_url` | `string` | `https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css` |
 | `js_url` | `string` | `https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js` |
+| `content_header` | `string` | `Cookies used on the website!` |
+| `content_message` | `string` | `This website uses cookies to ensure you get the best experience on our website.` |
+| `content_dismiss` | `string` | `Got it!` |
+| `content_allow` | `string` | `Allow cookies` |
+| `content_deny` | `string` | `Decline` |
+| `content_link` | `string` | `Learn more` |
 | `content_href` | `?string` | `null` |
 | `content_close` | `string` | `&#x274c;` |
+| `content_target` | `string` | `_blank` |
+| `content_policy` | `string` | `Cookie Policy` |
 | `popup_background` | `string` | `#696969` |
 | `popup_text` | `string` | `#FFFFFF` |
 | `popup_link` | `string` | `#FFFFFF` |
@@ -113,35 +115,6 @@ $settings->save();
 | ![Top Left](screenshots/cookie-consent-top-left.png) | ![Top Right](screenshots/cookie-consent-top-right.png) |
 | **Bottom Left** | **Bottom Right** |
 | ![Bottom Left](screenshots/cookie-consent-bottom-left.png) | ![Bottom Right](screenshots/cookie-consent-bottom-right.png) |
-
-## Translations
-
-This package supports multiple languages. The following languages are currently available:
-
-- Arabic (`ar`)
-- Czech (`cs`)
-- German (`de`)
-- English (`en`)
-- Spanish (`es`)
-- Persian (`fa`)
-- French (`fr`)
-- Hebrew (`he`)
-- Indonesian (`id`)
-- Italian (`it`)
-- Japanese (`ja`)
-- Dutch (`nl`)
-- Polish (`pl`)
-- Portuguese (`pt`)
-- Portuguese (Brazil) (`pt_BR`)
-- Portuguese (Portugal) (`pt_PT`)
-- Slovak (`sk`)
-- Turkish (`tr`)
-
-If you want to customize the translations, you can publish the language files:
-
-```bash
-php artisan vendor:publish --tag=cookie-consent-translations
-```
 
 ## Testing
 
