@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.0.2 - 2026-02-24
+
+### What's Changed
+
+- Add Laravel 13.x support in composer.json
+- Add orchestra/testbench ^11.0 for Laravel 13 testing
+
 ## v3.0.1 - 2026-02-23
 
 ### Changes
@@ -54,11 +61,13 @@ All notable changes to this project will be documented in this file.
    
    
    
+   
    ```
 2. Run migrations to create the settings in the database:
    
    ```bash
    php artisan migrate
+   
    
    
    
@@ -72,6 +81,7 @@ All notable changes to this project will be documented in this file.
    $settings->position = 'top-right';
    $settings->popup_background = '#000000';
    $settings->save();
+   
    
    
    
