@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.0.3 - 2026-04-26
+
+### What's Changed
+
+* Bump ramsey/composer-install from 3 to 4 by @dependabot[bot] in https://github.com/jeffersongoncalves/laravel-cookie-consent/pull/12
+* Bump dependabot/fetch-metadata from 2.5.0 to 3.0.0 by @dependabot[bot] in https://github.com/jeffersongoncalves/laravel-cookie-consent/pull/13
+
+**Full Changelog**: https://github.com/jeffersongoncalves/laravel-cookie-consent/compare/v3.0.2...v3.0.3
+
 ## v3.0.2 - 2026-02-24
 
 ### What's Changed
@@ -62,11 +71,13 @@ All notable changes to this project will be documented in this file.
    
    
    
+   
    ```
 2. Run migrations to create the settings in the database:
    
    ```bash
    php artisan migrate
+   
    
    
    
@@ -81,6 +92,7 @@ All notable changes to this project will be documented in this file.
    $settings->position = 'top-right';
    $settings->popup_background = '#000000';
    $settings->save();
+   
    
    
    
