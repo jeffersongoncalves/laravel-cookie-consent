@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## 4.0.1 - 2026-09-23
+
+### Changed
+
+- **Dependencies:** `spatie/laravel-settings` is now required as `^3.0`. The `^4.0` alternative pointed to a version that does not exist.
+
+### What's Changed
+
+* fix: pin GitHub Actions to commit SHA by @jeffersongoncalves in https://github.com/jeffersongoncalves/laravel-cookie-consent/pull/16
+* docs: add Buy Me a Coffee sponsor link by @jeffersongoncalves in https://github.com/jeffersongoncalves/laravel-cookie-consent/pull/17
+* chore: add GitHub Sponsors to FUNDING.yml by @jeffersongoncalves in https://github.com/jeffersongoncalves/laravel-cookie-consent/pull/18
+* ci: standardize update-changelog workflow (master) by @jeffersongoncalves in https://github.com/jeffersongoncalves/laravel-cookie-consent/pull/19
+* ci: standardize dependabot config by @jeffersongoncalves in https://github.com/jeffersongoncalves/laravel-cookie-consent/pull/20
+* ci: standardize tests workflow (master) by @jeffersongoncalves in https://github.com/jeffersongoncalves/laravel-cookie-consent/pull/21
+* chore(deps): drop non-existent spatie/laravel-settings ^4.0 by @jeffersongoncalves in https://github.com/jeffersongoncalves/laravel-cookie-consent/pull/23
+* ci: standardize tests workflow (master) by @jeffersongoncalves in https://github.com/jeffersongoncalves/laravel-cookie-consent/pull/22
+
+**Full Changelog**: https://github.com/jeffersongoncalves/laravel-cookie-consent/compare/v4.0.0...4.0.1
+
 ## v4.0.0 - 2026-08-01
 
 ### Security
@@ -84,11 +103,13 @@ Drop Laravel 11 support (EOL, unpatched). Require `laravel/framework: ^12.61.1|^
    
    
    
+   
    ```
 2. Run migrations to create the settings in the database:
    
    ```bash
    php artisan migrate
+   
    
    
    
@@ -105,6 +126,7 @@ Drop Laravel 11 support (EOL, unpatched). Require `laravel/framework: ^12.61.1|^
    $settings->position = 'top-right';
    $settings->popup_background = '#000000';
    $settings->save();
+   
    
    
    
