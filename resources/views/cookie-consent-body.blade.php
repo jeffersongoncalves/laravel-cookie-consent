@@ -1,7 +1,7 @@
 @php($settings = cookie_consent_settings())
-<script src="{{ $settings->js_url }}"
+<script @if(\Illuminate\Support\Facades\Vite::cspNonce()) nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" @endif src="{{ $settings->js_url }}"
         data-cfasync="false"></script>
-<script>
+<script @if(\Illuminate\Support\Facades\Vite::cspNonce()) nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" @endif>
     window.cookieconsent.initialise(@js([
         'palette' => [
             'popup' => [
