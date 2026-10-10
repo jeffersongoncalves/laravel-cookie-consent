@@ -51,9 +51,11 @@ class TestCase extends Orchestra
 
     protected function runSettingsMigration(): void
     {
-        /** @var SettingsMigration $migration */
-        $migration = require __DIR__.'/../database/settings/2026_01_01_000000_create_cookie_consent_settings.php';
-        $migration->up();
+        foreach (glob(__DIR__.'/../database/settings/*.php') ?: [] as $file) {
+            /** @var SettingsMigration $migration */
+            $migration = require $file;
+            $migration->up();
+        }
     }
 
     /**

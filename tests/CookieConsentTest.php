@@ -15,8 +15,17 @@ it('registers the settings class in the settings config', function () {
     expect(config('settings.settings'))->toContain(CookieConsentSettings::class);
 });
 
-it('registers all 23 settings keys via the migration', function () {
-    expect(DB::table('settings')->where('group', 'cookie_consent')->count())->toBe(23);
+it('registers all 25 settings keys via the migrations', function () {
+    expect(DB::table('settings')->where('group', 'cookie_consent')->count())->toBe(25);
+});
+
+it('keeps the pre-consent-mode behaviour by default', function () {
+    $settings = cookie_consent_settings();
+
+    expect($settings->type)->toBe('info')
+        ->and($settings->consent_mode)->toBeFalse()
+        ->and(view('cookie-consent::cookie-consent-head')->render())->not->toContain('<script')
+        ->and(view('cookie-consent::cookie-consent-body')->render())->not->toContain('onStatusChange');
 });
 
 it('renders the head view with the stylesheet link', function () {

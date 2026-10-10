@@ -52,6 +52,12 @@ class CookieConsentSettings extends Settings
 
     public string $theme;
 
+    /** cookieconsent compliance type: "info", "opt-in" or "opt-out". */
+    public string $type;
+
+    /** Push Google Consent Mode v2 signals (default + update) to the dataLayer. */
+    public bool $consent_mode;
+
     public static function group(): string
     {
         return 'cookie_consent';

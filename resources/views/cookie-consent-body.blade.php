@@ -2,7 +2,8 @@
 <script @if(\Illuminate\Support\Facades\Vite::cspNonce()) nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" @endif src="{{ $settings->js_url }}"
         data-cfasync="false"></script>
 <script @if(\Illuminate\Support\Facades\Vite::cspNonce()) nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" @endif>
-    window.cookieconsent.initialise(@js([
+    var cookieConsentConfig = @js([
+        'type' => $settings->type,
         'palette' => [
             'popup' => [
                 'background' => $settings->popup_background,
@@ -34,5 +35,11 @@
             'target' => $settings->content_target,
             'policy' => $settings->content_policy,
         ],
-    ]));
+    ]);
+    @if($settings->consent_mode)
+    cookieConsentConfig.onStatusChange = function (status) {
+        window.cookieConsentMode('update', status);
+    };
+    @endif
+    window.cookieconsent.initialise(cookieConsentConfig);
 </script>
