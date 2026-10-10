@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## 4.2.0 - 2026-10-10
+
+### Added
+
+- **Google Consent Mode v2.** New `consent_mode` setting: the head view pushes `gtag('consent', 'default', …)` for `ad_storage`, `ad_user_data`, `ad_personalization` and `analytics_storage` (restoring a previous choice from the `cookieconsent_status` cookie), and the banner pushes `gtag('consent', 'update', …)` when the visitor chooses. Works with [laravel-gtm](https://github.com/jeffersongoncalves/laravel-gtm), [laravel-gtag](https://github.com/jeffersongoncalves/laravel-gtag) or any Google tag — include the cookie consent head view **before** them.
+- **Compliance `type`** setting: `info` (default), `opt-in` or `opt-out`. The package never passed a type before, so the banner always ran as a notice and the Allow/Decline texts were never shown.
+
+| type | before a choice | allow | deny |
+|---|---|---|---|
+| opt-in | denied | granted | denied |
+| opt-out | granted | granted | denied |
+| info | granted | — | — |
+
+### Upgrade
+
+Run `php artisan migrate` (a new settings migration adds the two settings). Defaults keep the previous behaviour until you turn `consent_mode` on.
+
+**Full Changelog**: https://github.com/jeffersongoncalves/laravel-cookie-consent/compare/v4.1.0...4.2.0
+
 ## v4.1.0 - 2026-10-09
 
 - Every `<script>` rendered by the package carries Laravel's Vite CSP nonce when the app sets one (e.g. via laravel-security-headers), so nonce-based `script-src` policies work without `'unsafe-inline'`.
@@ -109,11 +128,13 @@ Drop Laravel 11 support (EOL, unpatched). Require `laravel/framework: ^12.61.1|^
    
    
    
+   
    ```
 2. Run migrations to create the settings in the database:
    
    ```bash
    php artisan migrate
+   
    
    
    
@@ -132,6 +153,7 @@ Drop Laravel 11 support (EOL, unpatched). Require `laravel/framework: ^12.61.1|^
    $settings->position = 'top-right';
    $settings->popup_background = '#000000';
    $settings->save();
+   
    
    
    
