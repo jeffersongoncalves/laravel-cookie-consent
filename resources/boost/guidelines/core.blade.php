@@ -33,6 +33,10 @@ The `CookieConsentSettings` class (group: `cookie_consent`) has these properties
 - `position` (string) -- Banner position (e.g., `bottom`, `top`, `bottom-left`)
 - `theme` (string) -- Theme name (e.g., `block`, `edgeless`, `classic`)
 
+**Compliance:**
+- `type` (string) -- `info` (default, notice only), `opt-in` or `opt-out`
+- `consent_mode` (bool) -- Google Consent Mode v2; include the head view before GTM/gtag
+
 ### Blade Integration
 
 @verbatim

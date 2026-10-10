@@ -104,6 +104,10 @@ $settings->highlight_text;        // string - hex color
 // Layout
 $settings->position;   // string - e.g., 'bottom', 'top', 'bottom-left', 'bottom-right'
 $settings->theme;       // string - e.g., 'block', 'edgeless', 'classic'
+
+// Compliance / Google Consent Mode v2
+$settings->type;         // string - 'info' (default), 'opt-in' or 'opt-out'
+$settings->consent_mode; // bool - push Consent Mode v2 default/update to the dataLayer
 ```
 
 ### Helper Function
@@ -126,7 +130,7 @@ Include in your layout's `<head>` section:
 @include('laravel-cookie-consent::cookie-consent-head')
 ```
 
-This renders a `<link>` tag pointing to `$settings->css_url`.
+This renders a `<link>` tag pointing to `$settings->css_url`. With `consent_mode` on it also renders the Consent Mode v2 default (read from the `cookieconsent_status` cookie), so it must come **before** the GTM/gtag snippets.
 
 #### Body View (JS Initialization)
 

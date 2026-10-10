@@ -109,6 +109,8 @@ $settings->save();
 | `highlight_text` | `string` | `#000000` |
 | `position` | `string` | `bottom-left` |
 | `theme` | `string` | `block` |
+| `type` | `string` | `info` (`info`, `opt-in` or `opt-out`) |
+| `consent_mode` | `bool` | `false` |
 
 ### Position
 
@@ -117,6 +119,36 @@ $settings->save();
 | ![Top Left](screenshots/cookie-consent-top-left.png) | ![Top Right](screenshots/cookie-consent-top-right.png) |
 | **Bottom Left** | **Bottom Right** |
 | ![Bottom Left](screenshots/cookie-consent-bottom-left.png) | ![Bottom Right](screenshots/cookie-consent-bottom-right.png) |
+
+## Google Consent Mode v2
+
+Google requires [Consent Mode v2](https://developers.google.com/tag-platform/security/guides/consent) for ads and analytics measurement of EEA/UK visitors. Turn it on and pick a compliance type:
+
+```php
+$settings = cookie_consent_settings();
+$settings->type = 'opt-in';      // banner shows Allow / Decline
+$settings->consent_mode = true;
+$settings->save();
+```
+
+The head view then pushes `gtag('consent', 'default', ...)` for `ad_storage`, `ad_user_data`, `ad_personalization` and `analytics_storage`, restoring a previous choice from the `cookieconsent_status` cookie, and the banner pushes `gtag('consent', 'update', ...)` when the visitor chooses.
+
+| `type` | Before a choice | Allow | Decline |
+|---|---|---|---|
+| `opt-in` | denied | granted | denied |
+| `opt-out` | granted | granted | denied |
+| `info` | granted | — | — |
+
+Include the head view **before** the Google Tag Manager or gtag snippet, so their tags start with the consent state already set:
+
+```blade
+<head>
+    @include('cookie-consent::cookie-consent-head')
+    @include('gtm::head') {{-- or @include('gtag::script') --}}
+</head>
+```
+
+Works with [laravel-gtm](https://github.com/jeffersongoncalves/laravel-gtm) and [laravel-gtag](https://github.com/jeffersongoncalves/laravel-gtag), or any Google tag on the page. `type` defaults to `info` and `consent_mode` to `false`, so upgrading changes nothing until you opt in; run `php artisan migrate` after updating to add the two settings.
 
 ## Content Security Policy
 
