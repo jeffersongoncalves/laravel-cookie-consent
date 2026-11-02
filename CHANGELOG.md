@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## 4.3.0 - 2026-11-02
+
+### Translatable banner text
+
+Closes #32 (#33).
+
+- Banner text now ships translated in 24 locales (`resources/lang/{locale}/banner.php`): `ar az cs de en es fa fr he hi id it ja nl pl pt pt_BR pt_PT ru sk tr uk uz zh_CN`. Publish with `php artisan vendor:publish --tag=cookie-consent-translations`.
+- `content_header`, `content_message`, `content_dismiss`, `content_allow`, `content_deny`, `content_link` and `content_policy` are now nullable. Null renders `__('cookie-consent::banner.<key>')` in the current locale; a string overrides it.
+- The "learn more" link is hidden when `content_href` is null.
+- Buttons no longer carry cookieconsent's hard-coded English `aria-label`s, so screen readers announce the translated text.
+
+### Upgrading
+
+Run `php artisan migrate`. The new settings migration sets the text settings that still hold the old English defaults to null, so they start translating; customised text is kept. The settings cache entry is refreshed by the migration.
+
+If you use **filament-cookie-consent**, its settings page still marks these fields as required, so an update there is needed before admins can save with empty (translated) fields.
+
 ## 4.2.0 - 2026-10-10
 
 ### Added
@@ -129,11 +146,13 @@ Drop Laravel 11 support (EOL, unpatched). Require `laravel/framework: ^12.61.1|^
    
    
    
+   
    ```
 2. Run migrations to create the settings in the database:
    
    ```bash
    php artisan migrate
+   
    
    
    
@@ -153,6 +172,7 @@ Drop Laravel 11 support (EOL, unpatched). Require `laravel/framework: ^12.61.1|^
    $settings->position = 'top-right';
    $settings->popup_background = '#000000';
    $settings->save();
+   
    
    
    
