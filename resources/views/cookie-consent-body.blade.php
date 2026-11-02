@@ -24,6 +24,14 @@
         'position' => $settings->position,
         'theme' => $settings->theme,
         'showLink' => $settings->content_href !== null,
+        // cookieconsent's defaults minus their English aria-labels, so the translated visible text is the accessible name.
+        'elements' => [
+            'messagelink' => '<span id="cookieconsent:desc" class="cc-message">@{{message}} <a role=button tabindex="0" class="cc-link" href="@{{href}}" rel="noopener noreferrer nofollow" target="@{{target}}">@{{link}}</a></span>',
+            'dismiss' => '<a role=button tabindex="0" class="cc-btn cc-dismiss">@{{dismiss}}</a>',
+            'allow' => '<a role=button tabindex="0" class="cc-btn cc-allow">@{{allow}}</a>',
+            'deny' => '<a role=button tabindex="0" class="cc-btn cc-deny">@{{deny}}</a>',
+            'link' => '<a role=button tabindex="0" class="cc-link" href="@{{href}}" rel="noopener noreferrer nofollow" target="@{{target}}">@{{link}}</a>',
+        ],
         'content' => [
             'header' => $settings->content_header ?? __('cookie-consent::banner.header'),
             'message' => $settings->content_message ?? __('cookie-consent::banner.message'),

@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\DB;
+use JeffersonGoncalves\CookieConsent\Settings\CookieConsentSettings;
+use Spatie\LaravelSettings\Support\SettingsCacheFactory;
 
 function render_banner(): string
 {
@@ -38,6 +40,27 @@ it('hides the learn more link when content_href is null', function () {
     $settings->save();
 
     expect(render_banner())->toMatch('/showLink[^,]*:true/');
+});
+
+it('drops the english aria-labels so the translated text names the buttons', function () {
+    expect(render_banner())
+        ->toContain('{{allow}}')
+        ->toContain('{{deny}}')
+        ->toContain('{{dismiss}}')
+        ->not->toContain('aria-label');
+});
+
+it('refreshes the cached settings after nulling the defaults', function () {
+    config(['settings.cache.enabled' => true, 'settings.cache.store' => 'array']);
+    $cache = app(SettingsCacheFactory::class)->build(CookieConsentSettings::repository());
+
+    $stale = cookie_consent_settings();
+    $stale->content_header = 'Cookies used on the website!';
+    $cache->put($stale);
+
+    (require __DIR__.'/../database/settings/2026_11_02_000000_make_cookie_consent_content_translatable.php')->up();
+
+    expect($cache->get(CookieConsentSettings::class)->content_header)->toBeNull();
 });
 
 it('nulls only the values that still equal the old english defaults', function () {
