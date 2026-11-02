@@ -74,17 +74,17 @@ $settings = app(CookieConsentSettings::class);
 $settings->css_url;    // string - cookieconsent CSS CDN URL
 $settings->js_url;     // string - cookieconsent JS CDN URL
 
-// Content strings
-$settings->content_header;   // string
-$settings->content_message;  // string - main banner message
-$settings->content_dismiss;  // string - dismiss button text
-$settings->content_allow;    // string - allow button text
-$settings->content_deny;     // string - deny button text
-$settings->content_link;     // string - "Learn more" link text
-$settings->content_href;     // ?string - privacy policy URL (nullable)
+// Content strings (null = __('cookie-consent::banner.<key>') in the current locale)
+$settings->content_header;   // ?string
+$settings->content_message;  // ?string - main banner message
+$settings->content_dismiss;  // ?string - dismiss button text
+$settings->content_allow;    // ?string - allow button text
+$settings->content_deny;     // ?string - deny button text
+$settings->content_link;     // ?string - "Learn more" link text
+$settings->content_href;     // ?string - privacy policy URL (null hides the link)
 $settings->content_close;    // string - close button text
 $settings->content_target;   // string - link target (_blank, _self)
-$settings->content_policy;   // string - policy text
+$settings->content_policy;   // ?string - policy text
 
 // Popup palette colors
 $settings->popup_background;      // string - hex color

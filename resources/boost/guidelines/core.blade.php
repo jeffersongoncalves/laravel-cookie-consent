@@ -21,8 +21,8 @@ The `CookieConsentSettings` class (group: `cookie_consent`) has these properties
 - `js_url` (string) -- URL for cookieconsent JS
 
 **Content strings:**
-- `content_header`, `content_message`, `content_dismiss`, `content_allow`, `content_deny`
-- `content_link`, `content_href` (nullable), `content_close`, `content_target`, `content_policy`
+- `content_header`, `content_message`, `content_dismiss`, `content_allow`, `content_deny`, `content_link`, `content_policy` (nullable; null renders `__('cookie-consent::banner.<key>')` in the current locale)
+- `content_href` (nullable; null hides the "learn more" link), `content_close`, `content_target`
 
 **Palette colors:**
 - `popup_background`, `popup_text`, `popup_link`
@@ -69,5 +69,5 @@ $theme = $settings->theme;
 - Settings group name is `cookie_consent`.
 - Views are namespaced as `laravel-cookie-consent::`.
 - Uses the cookieconsent JavaScript library (CDN URLs stored in settings).
-- The `content_href` property is the only nullable string (for optional privacy policy link).
+- Banner text ships translated in `resources/lang/{locale}/banner.php`; a non-null `content_*` setting overrides the translation.
 - Requires `spatie/laravel-settings` ^3.0 or ^4.0.
