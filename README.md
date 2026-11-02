@@ -88,16 +88,16 @@ $settings->save();
 |----------|------|---------|
 | `css_url` | `string` | `https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css` |
 | `js_url` | `string` | `https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js` |
-| `content_header` | `string` | `Cookies used on the website!` |
-| `content_message` | `string` | `This website uses cookies to ensure you get the best experience on our website.` |
-| `content_dismiss` | `string` | `Got it!` |
-| `content_allow` | `string` | `Allow cookies` |
-| `content_deny` | `string` | `Decline` |
-| `content_link` | `string` | `Learn more` |
-| `content_href` | `?string` | `null` |
+| `content_header` | `?string` | `null` (translated) |
+| `content_message` | `?string` | `null` (translated) |
+| `content_dismiss` | `?string` | `null` (translated) |
+| `content_allow` | `?string` | `null` (translated) |
+| `content_deny` | `?string` | `null` (translated) |
+| `content_link` | `?string` | `null` (translated) |
+| `content_href` | `?string` | `null` (hides the "learn more" link) |
 | `content_close` | `string` | `&#x274c;` |
 | `content_target` | `string` | `_blank` |
-| `content_policy` | `string` | `Cookie Policy` |
+| `content_policy` | `?string` | `null` (translated) |
 | `popup_background` | `string` | `#696969` |
 | `popup_text` | `string` | `#FFFFFF` |
 | `popup_link` | `string` | `#FFFFFF` |
@@ -111,6 +111,20 @@ $settings->save();
 | `theme` | `string` | `block` |
 | `type` | `string` | `info` (`info`, `opt-in` or `opt-out`) |
 | `consent_mode` | `bool` | `false` |
+
+### Translations
+
+The banner text is translated into the app locale. A `content_*` text setting left at `null` renders `__('cookie-consent::banner.<key>')`; a string value overrides it in every locale.
+
+Shipped locales: `ar az cs de en es fa fr he hi id it ja nl pl pt pt_BR pt_PT ru sk tr uk uz zh_CN`.
+
+Override or add a locale by publishing the files:
+
+```bash
+php artisan vendor:publish --tag=cookie-consent-translations
+```
+
+Upgrading: the `make_cookie_consent_content_translatable` settings migration sets the text settings that still hold the old English defaults to `null`. Text you customised is kept.
 
 ### Position
 

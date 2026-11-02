@@ -10,25 +10,30 @@ class CookieConsentSettings extends Settings
 
     public string $js_url;
 
-    public string $content_header;
+    /*
+     * The text fields below are null by default: null renders
+     * __('cookie-consent::banner.<key>') in the current locale, a string overrides it.
+     */
+    public ?string $content_header;
 
-    public string $content_message;
+    public ?string $content_message;
 
-    public string $content_dismiss;
+    public ?string $content_dismiss;
 
-    public string $content_allow;
+    public ?string $content_allow;
 
-    public string $content_deny;
+    public ?string $content_deny;
 
-    public string $content_link;
+    public ?string $content_link;
 
+    /** Null hides the "learn more" link. */
     public ?string $content_href;
 
     public string $content_close;
 
     public string $content_target;
 
-    public string $content_policy;
+    public ?string $content_policy;
 
     public string $popup_background;
 

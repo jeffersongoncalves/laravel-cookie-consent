@@ -13,7 +13,8 @@ class CookieConsentServiceProvider extends PackageServiceProvider
     {
         $package
             ->name('laravel-cookie-consent')
-            ->hasViews();
+            ->hasViews()
+            ->hasTranslations();
     }
 
     public function packageRegistered(): void
