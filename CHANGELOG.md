@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 4.4.0 - 2026-11-16
+
+### LGPD consent ledger integration
+
+When [laravel-lgpd-consent](https://github.com/jeffersongoncalves/laravel-lgpd-consent) is installed with its endpoint enabled, the banner records every **allow/deny** in the consent ledger under the purpose `cookies` (proof of consent, LGPD art. 8). Dismiss is ignored.
+
+- Detected automatically via the `lgpd-consent.store` route: no new dependency or setting
+- `keepalive` requests, `XSRF-TOKEN` cookie first (works on cached pages)
+- Latest choice kept pending until confirmed: ordered delivery, retries, resent on next page load
+- Works alongside Google Consent Mode
+
+No changes when laravel-lgpd-consent is not installed.
+
 ## 4.3.0 - 2026-11-02
 
 ### Translatable banner text
@@ -147,11 +160,13 @@ Drop Laravel 11 support (EOL, unpatched). Require `laravel/framework: ^12.61.1|^
    
    
    
+   
    ```
 2. Run migrations to create the settings in the database:
    
    ```bash
    php artisan migrate
+   
    
    
    
@@ -172,6 +187,7 @@ Drop Laravel 11 support (EOL, unpatched). Require `laravel/framework: ^12.61.1|^
    $settings->position = 'top-right';
    $settings->popup_background = '#000000';
    $settings->save();
+   
    
    
    
