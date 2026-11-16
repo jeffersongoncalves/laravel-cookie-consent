@@ -164,6 +164,14 @@ Include the head view **before** the Google Tag Manager or gtag snippet, so thei
 
 Works with [laravel-gtm](https://github.com/jeffersongoncalves/laravel-gtm) and [laravel-gtag](https://github.com/jeffersongoncalves/laravel-gtag), or any Google tag on the page. `type` defaults to `info` and `consent_mode` to `false`, so upgrading changes nothing until you opt in; run `php artisan migrate` after updating to add the two settings.
 
+## LGPD consent ledger
+
+Install [laravel-lgpd-consent](https://github.com/jeffersongoncalves/laravel-lgpd-consent) and enable its endpoint (`lgpd-consent.route.enabled => true`). From then on, the banner records every **allow** and **deny** in the consent ledger under the purpose `cookies`, as proof of consent (LGPD art. 8). A **dismiss** is not a choice, so nothing is recorded for it. You don't change any code in this package. If you configure `lgpd-consent.purposes`, add `cookies` to that list.
+
+The request sends the `XSRF-TOKEN` cookie, so it keeps working on cached pages. If that cookie is missing, it falls back to the page's CSRF token. The request uses `keepalive`, so it completes even when the visitor leaves the page right away.
+
+The latest choice stays pending in `localStorage` until the server confirms it. Only one request is in flight at a time, so the latest choice is always the last one recorded. When a request fails, it is retried twice, and if it still fails it is sent again on the next page load. A request the server rejects for good (a 4xx other than 419 or 429) is dropped.
+
 ## Content Security Policy
 
 When your app sets a CSP nonce through Laravel's Vite (`Vite::useCspNonce()`, as [laravel-security-headers](https://github.com/jeffersongoncalves/laravel-security-headers) does), every `<script>` this package renders carries it, so a `script-src 'self' 'nonce-{nonce}'` policy works without `'unsafe-inline'`. Scripts loaded afterwards from the vendor's own CDN still need that host in `script-src` (and its API in `connect-src`).
