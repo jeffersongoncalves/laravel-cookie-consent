@@ -1,4 +1,6 @@
 @php($settings = cookie_consent_settings())
+@php($lgpdConsentUrl = \Illuminate\Support\Facades\Route::has('lgpd-consent.store') ? route('lgpd-consent.store', absolute: false) : null)
+@php($csrfToken = request()->hasSession() ? csrf_token() : null)
 <script @if(\Illuminate\Support\Facades\Vite::cspNonce()) nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" @endif src="{{ $settings->js_url }}"
         data-cfasync="false"></script>
 <script @if(\Illuminate\Support\Facades\Vite::cspNonce()) nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" @endif>
@@ -45,9 +47,30 @@
             'policy' => $settings->content_policy ?? __('cookie-consent::banner.policy'),
         ],
     ]);
-    @if($settings->consent_mode)
+    @if($settings->consent_mode || $lgpdConsentUrl)
     cookieConsentConfig.onStatusChange = function (status) {
+        @if($settings->consent_mode)
         window.cookieConsentMode('update', status);
+        @endif
+        @if($lgpdConsentUrl)
+        // jeffersongoncalves/laravel-lgpd-consent: record the choice in the consent ledger. "dismiss" is not a choice.
+        if (status === 'allow' || status === 'deny') {
+            // XSRF-TOKEN cookie first: the embedded token goes stale on cached pages.
+            var xsrf = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
+            var headers = {'Content-Type': 'application/json', 'Accept': 'application/json'};
+            if (xsrf) {
+                headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf[1]);
+            } else if (@js($csrfToken)) {
+                headers['X-CSRF-TOKEN'] = @js($csrfToken);
+            }
+            window.fetch(@js($lgpdConsentUrl), {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: headers,
+                body: JSON.stringify({purpose: 'cookies', granted: status === 'allow'})
+            });
+        }
+        @endif
     };
     @endif
     window.cookieconsent.initialise(cookieConsentConfig);
