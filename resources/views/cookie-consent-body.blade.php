@@ -47,14 +47,25 @@
             'policy' => $settings->content_policy ?? __('cookie-consent::banner.policy'),
         ],
     ]);
-    @if($settings->consent_mode || $lgpdConsentUrl)
-    cookieConsentConfig.onStatusChange = function (status) {
-        @if($settings->consent_mode)
-        window.cookieConsentMode('update', status);
-        @endif
-        @if($lgpdConsentUrl)
-        // jeffersongoncalves/laravel-lgpd-consent: record the choice in the consent ledger. "dismiss" is not a choice.
-        if (status === 'allow' || status === 'deny') {
+    @if($lgpdConsentUrl)
+    // jeffersongoncalves/laravel-lgpd-consent: record each choice in the consent ledger.
+    // One pending slot (latest choice wins) kept until the server confirms, one request at a time,
+    // so the latest choice is always recorded last and survives failures and reloads.
+    var lgpdConsent = (function () {
+        var key = 'lgpd_consent_pending', memory = null, busy = false;
+
+        function pending() {
+            try { return window.localStorage.getItem(key) || memory; } catch (e) { return memory; }
+        }
+
+        function store(status) {
+            memory = status;
+            try { status === null ? window.localStorage.removeItem(key) : window.localStorage.setItem(key, status); } catch (e) {}
+        }
+
+        function send(status, attempt) {
+            if (busy) return;
+            busy = true;
             // XSRF-TOKEN cookie first: the embedded token goes stale on cached pages.
             var xsrf = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
             var headers = {'Content-Type': 'application/json', 'Accept': 'application/json'};
@@ -66,9 +77,44 @@
             window.fetch(@js($lgpdConsentUrl), {
                 method: 'POST',
                 credentials: 'same-origin',
+                keepalive: true,
                 headers: headers,
                 body: JSON.stringify({purpose: 'cookies', granted: status === 'allow'})
+            }).then(function (response) {
+                // Other 4xx (e.g. 422 unknown purpose) will never succeed: drop them. 419/429 may.
+                return response.ok || (response.status >= 400 && response.status < 500 && response.status !== 419 && response.status !== 429);
+            }, function () {
+                return false;
+            }).then(function (done) {
+                busy = false;
+                var latest = pending();
+                if (latest !== status) {
+                    if (latest) send(latest, 0);
+                } else if (done) {
+                    store(null);
+                } else if (attempt < 2) {
+                    setTimeout(function () { send(status, attempt + 1); }, 2000 * (attempt + 1));
+                }
+                // Still failing: stays pending and is retried on the next page load.
             });
+        }
+
+        return {
+            choose: function (status) { store(status); send(status, 0); },
+            resume: function () { var status = pending(); if (status) send(status, 0); }
+        };
+    })();
+    lgpdConsent.resume();
+    @endif
+    @if($settings->consent_mode || $lgpdConsentUrl)
+    cookieConsentConfig.onStatusChange = function (status) {
+        @if($settings->consent_mode)
+        window.cookieConsentMode('update', status);
+        @endif
+        @if($lgpdConsentUrl)
+        // "dismiss" is not a choice.
+        if (status === 'allow' || status === 'deny') {
+            lgpdConsent.choose(status);
         }
         @endif
     };
