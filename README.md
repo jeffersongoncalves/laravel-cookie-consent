@@ -111,6 +111,12 @@ $settings->save();
 | `theme` | `string` | `block` |
 | `type` | `string` | `info` (`info`, `opt-in` or `opt-out`) |
 | `consent_mode` | `bool` | `false` |
+| `mode` | `string` | `banner` (`banner` or `categories`) |
+| `block_scripts` | `bool` | `false` |
+| `script_categories` | `array` | `[]` (script id => category, `""` never blocks) |
+| `honor_gpc` | `bool` | `false` |
+| `preferences_css_url` | `string` | `https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3.1.0/dist/cookieconsent.css` |
+| `preferences_js_url` | `string` | `https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3.1.0/dist/cookieconsent.umd.js` |
 
 ### Translations
 
@@ -174,11 +180,61 @@ Install one of the privacy packages below and enable its endpoint. From then on,
 | [laravel-gdpr-consent](https://github.com/jeffersongoncalves/laravel-gdpr-consent) | `gdpr-consent.route.enabled => true` | consent under the purpose `cookies`, as proof of consent (GDPR Art. 7(1)) |
 | [laravel-ccpa-opt-out](https://github.com/jeffersongoncalves/laravel-ccpa-opt-out) | `ccpa-opt-out.route.enabled => true` | **deny** opts out of the sale or sharing of personal information (`sale_sharing`), **allow** opts back in |
 
-If you configure `lgpd-consent.purposes` or `gdpr-consent.purposes`, add `cookies` to that list. With several of them installed, each choice goes to all of them.
+If you configure `lgpd-consent.purposes` or `gdpr-consent.purposes`, add `cookies` to that list (in categories mode: `cookies_analytics`, `cookies_marketing` and `cookies_functionality`, one consent per category; for CCPA, refusing marketing is the opt-out). With several of them installed, each choice goes to all of them.
 
 The request sends the `XSRF-TOKEN` cookie, so it keeps working on cached pages. If that cookie is missing, it falls back to the page's CSRF token. The request uses `keepalive`, so it completes even when the visitor leaves the page right away.
 
 The latest choice stays pending in `localStorage` until the server confirms it, one slot per package. Only one request per package is in flight at a time, so the latest choice is always the last one recorded. When a request fails, it is retried twice, and if it still fails it is sent again on the next page load. A request the server rejects for good (a 4xx other than 419 or 429) is dropped.
+
+## Blocking scripts until consent
+
+Under the LGPD and the GDPR, analytics and marketing cookies need consent **before** they are set. Run `php artisan migrate` after updating (every new setting is off), turn on `block_scripts`, and the scripts of these packages wait for the visitor to allow their category:
+
+```php
+$settings = cookie_consent_settings();
+$settings->type = 'opt-in';
+$settings->block_scripts = true;
+$settings->save();
+```
+
+| Category | Packages |
+|---|---|
+| `analytics` | [gtag](https://github.com/jeffersongoncalves/laravel-gtag), [clarity](https://github.com/jeffersongoncalves/laravel-clarity), [hotjar](https://github.com/jeffersongoncalves/laravel-hotjar), [mixpanel](https://github.com/jeffersongoncalves/laravel-mixpanel), [amplitude](https://github.com/jeffersongoncalves/laravel-amplitude), [matomo](https://github.com/jeffersongoncalves/laravel-matomo) |
+| `marketing` | [gtm](https://github.com/jeffersongoncalves/laravel-gtm), [pixel](https://github.com/jeffersongoncalves/laravel-pixel) |
+| `functionality` | [crisp](https://github.com/jeffersongoncalves/laravel-crisp), [tawk-to](https://github.com/jeffersongoncalves/laravel-tawk-to) |
+| never blocked (no cookies) | plausible, fathom, simple-analytics, pirsch, cloudflare-web-analytics, goatcounter, umami |
+
+Each package renders its `<script>` with `type="text/plain" data-category="…"`, and this package runs it, with its CSP nonce, once the category is allowed: on `opt-in` after **allow**, on `opt-out` right away unless the visitor declines. Google tags are left to Consent Mode when `consent_mode` is on. Change a category with `script_categories` (`['plausible' => 'analytics', 'pixel' => '']`; `""` never blocks). Your own scripts work the same way:
+
+```blade
+<script type="text/plain" data-category="marketing">/* runs once marketing is allowed */</script>
+```
+
+A refusal after a script ran takes effect on the next page load. The packages ask for their attributes through `cookie_consent_script_attributes('<id>')` behind `function_exists()`, so none of them requires this package.
+
+With `honor_gpc` on, a [Global Privacy Control](https://globalprivacycontrol.org) signal refuses the marketing category (and the ad signals of Consent Mode), as the CCPA and several US state laws require.
+
+## A choice per category
+
+Set `mode` to `categories` for a banner with **Accept all**, **Reject all** and **Manage preferences**, where the visitor turns each category on or off, as the European data protection authorities and the ANPD expect. It uses [vanilla-cookieconsent](https://github.com/orestbida/cookieconsent) 3 and shows the categories of the packages installed (analytics and marketing when none is). The texts come from `cookie-consent::preferences` and the `content_*` settings; `position` places the box. Consent Mode then follows each category: `analytics_storage` the analytics one, the ad signals the marketing one.
+
+Any element with `data-cc="show-preferencesModal"` reopens the preferences.
+
+## Cookie policy
+
+```blade
+@include('cookie-consent::policy')
+```
+
+renders the cookie table of your cookie policy, grouped by category and translated: the session, XSRF and consent cookies, the cookies of the privacy ledgers installed, and those of the packages above that are installed. Add your own rows:
+
+```blade
+@include('cookie-consent::policy', ['cookies' => [
+    ['theme', 'This website', 'Remembers the dark mode.', '1 year', 'functionality'],
+]])
+```
+
+Lifetimes are written like `1 year` or `30 minutes` (or `session`) and shown in the app locale. In categories mode the table ends with a button that reopens the preferences.
 
 ## Content Security Policy
 

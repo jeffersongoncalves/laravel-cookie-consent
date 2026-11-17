@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Vite;
 use Symfony\Component\Process\ExecutableFinder;
-use Symfony\Component\Process\Process;
 
 function enableConsentMode(string $type): void
 {
@@ -27,10 +26,7 @@ function runConsentScript(?string $cookie, ?string $statusChange = null): array
         .($statusChange ? 'window.cookieConsentMode("update", '.json_encode($statusChange).');' : '')
         .'console.log(JSON.stringify(dataLayer.map(function (a) { return Array.from(a); })));';
 
-    $process = new Process(['node', '-e', $js]);
-    $process->mustRun();
-
-    return json_decode($process->getOutput(), true);
+    return json_decode(runNode($js), true);
 }
 
 it('passes the compliance type to cookieconsent', function () {

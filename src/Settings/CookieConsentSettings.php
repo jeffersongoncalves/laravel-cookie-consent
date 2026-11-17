@@ -63,6 +63,27 @@ class CookieConsentSettings extends Settings
     /** Push Google Consent Mode v2 signals (default + update) to the dataLayer. */
     public bool $consent_mode;
 
+    /** "banner" (one allow/deny choice) or "categories" (a choice per cookie category). */
+    public string $mode;
+
+    /** Keep the scripts of the analytics/chat packages from running until their category is allowed. */
+    public bool $block_scripts;
+
+    /**
+     * Overrides the category of a script, keyed by script id (see Scripts::CATALOG):
+     * "analytics", "marketing", "functionality", or "" to never block it.
+     *
+     * @var array<string, string>
+     */
+    public array $script_categories;
+
+    /** Treat a Global Privacy Control signal as a refusal of the marketing category. */
+    public bool $honor_gpc;
+
+    public string $preferences_css_url;
+
+    public string $preferences_js_url;
+
     public static function group(): string
     {
         return 'cookie_consent';

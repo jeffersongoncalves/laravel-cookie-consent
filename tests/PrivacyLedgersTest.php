@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\Process\ExecutableFinder;
-use Symfony\Component\Process\Process;
 
 function registerLedgerRoute(string $path = 'lgpd/consent', string $name = 'lgpd-consent.store'): void
 {
@@ -47,7 +46,7 @@ function runBodyScript(array $statuses, string $cookie = '', array $responses = 
         // Let the promise chains settle, then stop.
         .'realTimeout(function () { console.log(JSON.stringify({calls: calls, pending: store['.json_encode($key).'] || null})); process.exit(0); }, 80);';
 
-    return json_decode((new Process(['node', '-e', $js]))->mustRun()->getOutput(), true);
+    return json_decode(runNode($js), true);
 }
 
 /**
