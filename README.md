@@ -164,13 +164,21 @@ Include the head view **before** the Google Tag Manager or gtag snippet, so thei
 
 Works with [laravel-gtm](https://github.com/jeffersongoncalves/laravel-gtm) and [laravel-gtag](https://github.com/jeffersongoncalves/laravel-gtag), or any Google tag on the page. `type` defaults to `info` and `consent_mode` to `false`, so upgrading changes nothing until you opt in; run `php artisan migrate` after updating to add the two settings.
 
-## LGPD consent ledger
+## Privacy ledgers (LGPD, GDPR, CCPA)
 
-Install [laravel-lgpd-consent](https://github.com/jeffersongoncalves/laravel-lgpd-consent) and enable its endpoint (`lgpd-consent.route.enabled => true`). From then on, the banner records every **allow** and **deny** in the consent ledger under the purpose `cookies`, as proof of consent (LGPD art. 8). A **dismiss** is not a choice, so nothing is recorded for it. You don't change any code in this package. If you configure `lgpd-consent.purposes`, add `cookies` to that list.
+Install one of the privacy packages below and enable its endpoint. From then on, the banner records every **allow** and **deny** there. A **dismiss** is not a choice, so nothing is recorded for it. You don't change any code in this package.
+
+| Package | Enable | What the banner records |
+|---|---|---|
+| [laravel-lgpd-consent](https://github.com/jeffersongoncalves/laravel-lgpd-consent) | `lgpd-consent.route.enabled => true` | consent under the purpose `cookies`, as proof of consent (LGPD art. 8) |
+| [laravel-gdpr-consent](https://github.com/jeffersongoncalves/laravel-gdpr-consent) | `gdpr-consent.route.enabled => true` | consent under the purpose `cookies`, as proof of consent (GDPR Art. 7(1)) |
+| [laravel-ccpa-opt-out](https://github.com/jeffersongoncalves/laravel-ccpa-opt-out) | `ccpa-opt-out.route.enabled => true` | **deny** opts out of the sale or sharing of personal information (`sale_sharing`), **allow** opts back in |
+
+If you configure `lgpd-consent.purposes` or `gdpr-consent.purposes`, add `cookies` to that list. With several of them installed, each choice goes to all of them.
 
 The request sends the `XSRF-TOKEN` cookie, so it keeps working on cached pages. If that cookie is missing, it falls back to the page's CSRF token. The request uses `keepalive`, so it completes even when the visitor leaves the page right away.
 
-The latest choice stays pending in `localStorage` until the server confirms it. Only one request is in flight at a time, so the latest choice is always the last one recorded. When a request fails, it is retried twice, and if it still fails it is sent again on the next page load. A request the server rejects for good (a 4xx other than 419 or 429) is dropped.
+The latest choice stays pending in `localStorage` until the server confirms it, one slot per package. Only one request per package is in flight at a time, so the latest choice is always the last one recorded. When a request fails, it is retried twice, and if it still fails it is sent again on the next page load. A request the server rejects for good (a 4xx other than 419 or 429) is dropped.
 
 ## Content Security Policy
 

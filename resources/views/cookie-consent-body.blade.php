@@ -1,5 +1,11 @@
 @php($settings = cookie_consent_settings())
-@php($lgpdConsentUrl = \Illuminate\Support\Facades\Route::has('lgpd-consent.store') ? route('lgpd-consent.store', absolute: false) : null)
+@php($ledgers = collect([
+    ['route' => 'lgpd-consent.store', 'key' => 'lgpd_consent_pending', 'kind' => 'consent'],
+    ['route' => 'gdpr-consent.store', 'key' => 'gdpr_consent_pending', 'kind' => 'consent'],
+    ['route' => 'ccpa-opt-out.store', 'key' => 'ccpa_opt_out_pending', 'kind' => 'opt_out'],
+])->filter(fn (array $ledger) => \Illuminate\Support\Facades\Route::has($ledger['route']))
+    ->map(fn (array $ledger) => ['url' => route($ledger['route'], absolute: false), 'key' => $ledger['key'], 'kind' => $ledger['kind']])
+    ->values()->all())
 @php($csrfToken = request()->hasSession() ? csrf_token() : null)
 <script @if(\Illuminate\Support\Facades\Vite::cspNonce()) nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" @endif src="{{ $settings->js_url }}"
         data-cfasync="false"></script>
@@ -47,20 +53,28 @@
             'policy' => $settings->content_policy ?? __('cookie-consent::banner.policy'),
         ],
     ]);
-    @if($lgpdConsentUrl)
-    // jeffersongoncalves/laravel-lgpd-consent: record each choice in the consent ledger.
-    // One pending slot (latest choice wins) kept until the server confirms, one request at a time,
-    // so the latest choice is always recorded last and survives failures and reloads.
-    var lgpdConsent = (function () {
-        var key = 'lgpd_consent_pending', memory = null, busy = false;
+    @if($ledgers !== [])
+    // Record each choice in the privacy ledgers installed (laravel-lgpd-consent, laravel-gdpr-consent,
+    // laravel-ccpa-opt-out). Per ledger: one pending slot (latest choice wins) kept until the server
+    // confirms, one request at a time, so the latest choice is always recorded last and survives
+    // failures and reloads.
+    var privacyLedgers = @js($ledgers).map(function (ledger) {
+        var memory = null, busy = false;
 
         function pending() {
-            try { return window.localStorage.getItem(key) || memory; } catch (e) { return memory; }
+            try { return window.localStorage.getItem(ledger.key) || memory; } catch (e) { return memory; }
         }
 
         function store(status) {
             memory = status;
-            try { status === null ? window.localStorage.removeItem(key) : window.localStorage.setItem(key, status); } catch (e) {}
+            try { status === null ? window.localStorage.removeItem(ledger.key) : window.localStorage.setItem(ledger.key, status); } catch (e) {}
+        }
+
+        function body(status) {
+            // CCPA: denying cookies opts out of the sale or sharing of personal information.
+            return ledger.kind === 'opt_out'
+                ? {right: 'sale_sharing', opted_out: status !== 'allow'}
+                : {purpose: 'cookies', granted: status === 'allow'};
         }
 
         function send(status, attempt) {
@@ -74,12 +88,12 @@
             } else if (@js($csrfToken)) {
                 headers['X-CSRF-TOKEN'] = @js($csrfToken);
             }
-            window.fetch(@js($lgpdConsentUrl), {
+            window.fetch(ledger.url, {
                 method: 'POST',
                 credentials: 'same-origin',
                 keepalive: true,
                 headers: headers,
-                body: JSON.stringify({purpose: 'cookies', granted: status === 'allow'})
+                body: JSON.stringify(body(status))
             }).then(function (response) {
                 // Other 4xx (e.g. 422 unknown purpose) will never succeed: drop them. 419/429 may.
                 return response.ok || (response.status >= 400 && response.status < 500 && response.status !== 419 && response.status !== 429);
@@ -103,18 +117,18 @@
             choose: function (status) { store(status); send(status, 0); },
             resume: function () { var status = pending(); if (status) send(status, 0); }
         };
-    })();
-    lgpdConsent.resume();
+    });
+    privacyLedgers.forEach(function (ledger) { ledger.resume(); });
     @endif
-    @if($settings->consent_mode || $lgpdConsentUrl)
+    @if($settings->consent_mode || $ledgers !== [])
     cookieConsentConfig.onStatusChange = function (status) {
         @if($settings->consent_mode)
         window.cookieConsentMode('update', status);
         @endif
-        @if($lgpdConsentUrl)
+        @if($ledgers !== [])
         // "dismiss" is not a choice.
         if (status === 'allow' || status === 'deny') {
-            lgpdConsent.choose(status);
+            privacyLedgers.forEach(function (ledger) { ledger.choose(status); });
         }
         @endif
     };
