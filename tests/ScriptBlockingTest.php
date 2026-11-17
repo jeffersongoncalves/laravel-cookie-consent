@@ -19,9 +19,10 @@ function cookieConsentSettings(array $values): void
  * category, then $then (JS), and returns what ran, the ledger calls, the dataLayer and the
  * config handed to the categories banner.
  *
- * @return array{ran: list<array{category: string, nonce: string, type: string|null}>, calls: list<array{0: string, 1: array<string, mixed>}>, dataLayer: list<mixed>, cc: array<string, mixed>|null}
+ * @param  list<array{category: string, src?: string, async?: bool}>|null  $held  default: one inline script per category
+ * @return array{ran: list<array{category: string, nonce: string, type: string|null, src: string|null}>, calls: list<array{0: string, 1: array<string, mixed>}>, dataLayer: list<mixed>, cc: array<string, mixed>|null}
  */
-function runConsentPage(string $cookie = '', string $then = '', bool $gpc = false): array
+function runConsentPage(string $cookie = '', string $then = '', bool $gpc = false, ?array $held = null): array
 {
     $scripts = fn (string $view): string => implode('', array_filter(
         (preg_match_all('/<script[^>]*>(.*?)<\/script>/s', view($view)->render(), $m) ? $m[1] : []),
@@ -30,10 +31,15 @@ function runConsentPage(string $cookie = '', string $then = '', bool $gpc = fals
 
     $js = 'var window = globalThis, ran = [], calls = [];'
         .($gpc ? 'Object.defineProperty(globalThis, "navigator", {value: {globalPrivacyControl: true}, configurable: true});' : '')
-        .'var held = ["analytics", "marketing", "functionality"].map(function (category) {'
-        .'  var node = {nonce: "n-" + category, text: category, attributes: [{name: "type", value: "text/plain"}, {name: "data-category", value: category}, {name: "nonce", value: ""}],'
-        .'    getAttribute: function (name) { return name === "data-category" ? category : null; }};'
-        .'  node.parentNode = {replaceChild: function (script) { held.splice(held.indexOf(node), 1); ran.push({category: script.attrs["data-category"], nonce: script.nonce, type: script.attrs.type || null}); }};'
+        .'var held = '.json_encode($held ?? [['category' => 'analytics'], ['category' => 'marketing'], ['category' => 'functionality']]).'.map(function (spec) {'
+        .'  var attributes = [{name: "type", value: "text/plain"}, {name: "data-category", value: spec.category}, {name: "nonce", value: ""}];'
+        .'  if (spec.src) attributes.push({name: "src", value: spec.src});'
+        .'  if (spec.async) attributes.push({name: "async", value: ""});'
+        .'  var node = {nonce: "n-" + spec.category, text: spec.category, attributes: attributes,'
+        .'    getAttribute: function (name) { var a = attributes.filter(function (a) { return a.name === name; })[0]; return a ? a.value : null; },'
+        .'    hasAttribute: function (name) { return node.getAttribute(name) !== null; }};'
+        .'  node.parentNode = {replaceChild: function (script) { held.splice(held.indexOf(node), 1); window.lastScript = script;'
+        .'    ran.push({category: script.attrs["data-category"], nonce: script.nonce, type: script.attrs.type || null, src: script.attrs.src || null}); }};'
         .'  return node; });'
         .'var document = {cookie: '.json_encode($cookie).', querySelectorAll: function () { return held.slice(); },'
         .'  createElement: function () { return {attrs: {}, setAttribute: function (n, v) { this.attrs[n] = v; }}; }};'
@@ -114,9 +120,21 @@ describe('activation (runs the scripts in Node)', function () {
         $result = runConsentPage(then: 'window.cfg.onStatusChange("allow");');
 
         expect(ranCategories($result))->toBe(['analytics', 'marketing', 'functionality'])
-            ->and($result['ran'][0])->toBe(['category' => 'analytics', 'nonce' => 'n-analytics', 'type' => null])
+            ->and($result['ran'][0])->toBe(['category' => 'analytics', 'nonce' => 'n-analytics', 'type' => null, 'src' => null])
             ->and(ranCategories(runConsentPage('cookieconsent_status=allow')))->toHaveCount(3)
             ->and(runConsentPage('cookieconsent_status=deny')['ran'])->toBe([]);
+    });
+
+    it('waits for a blocking src script to load before running the next one', function () {
+        cookieConsentSettings(['block_scripts' => true, 'type' => 'opt-in']);
+        $held = [['category' => 'analytics', 'src' => 'lib.js'], ['category' => 'analytics'], ['category' => 'analytics', 'src' => 'a.js', 'async' => true], ['category' => 'analytics']];
+
+        // allow twice: the second activation must not run the init script still waiting for lib.js.
+        $waiting = runConsentPage(then: 'window.cfg.onStatusChange("allow"); window.cfg.onStatusChange("allow");', held: $held);
+        $loaded = runConsentPage(then: 'window.cfg.onStatusChange("allow"); window.lastScript.onload();', held: $held);
+
+        expect(array_column($waiting['ran'], 'src'))->toBe(['lib.js'])
+            ->and(array_column($loaded['ran'], 'src'))->toBe(['lib.js', null, 'a.js', null]);
     });
 
     it('runs everything right away on opt-out, except marketing under Global Privacy Control', function () {

@@ -31,8 +31,16 @@
     // Scripts held with type="text/plain" data-category="…" run once their category is allowed.
     // A refusal after they ran takes effect on the next page load.
     window.cookieConsentActivate = function (state) {
-        Array.prototype.forEach.call(document.querySelectorAll('script[type="text/plain"][data-category]'), function (held) {
-            if (!state[held.getAttribute('data-category')]) return;
+        var queue = Array.prototype.filter.call(document.querySelectorAll('script[type="text/plain"][data-category]'), function (held) {
+            if (held.cookieConsentQueued || !state[held.getAttribute('data-category')]) return false;
+            held.cookieConsentQueued = true;
+
+            return true;
+        });
+
+        (function next() {
+            var held = queue.shift();
+            if (!held) return;
             var script = document.createElement('script');
             Array.prototype.forEach.call(held.attributes, function (attribute) {
                 if (attribute.name !== 'type' && attribute.name !== 'nonce') script.setAttribute(attribute.name, attribute.value);
@@ -40,8 +48,16 @@
             // The nonce attribute reads empty once parsed; the property keeps it.
             if (held.nonce) script.nonce = held.nonce;
             script.text = held.text;
+            // Inserted scripts load async: a blocking src one (no async/defer) must load before
+            // the scripts after it run, as the page had it (e.g. a library, then its init).
+            var blocking = held.hasAttribute('src') && !held.hasAttribute('async') && !held.hasAttribute('defer');
+            if (blocking) {
+                script.async = false;
+                script.onload = script.onerror = next;
+            }
             held.parentNode.replaceChild(script, held);
-        });
+            if (!blocking) next();
+        })();
     };
     @endif
     @if($ledgers !== [])
