@@ -4,10 +4,15 @@ use Illuminate\Support\Facades\Route;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
+function registerLedgerRoute(string $path = 'lgpd/consent', string $name = 'lgpd-consent.store'): void
+{
+    Route::post($path, fn () => response()->noContent())->name($name);
+    Route::getRoutes()->refreshNameLookups();
+}
+
 function registerLgpdConsentRoute(): void
 {
-    Route::post('lgpd/consent', fn () => response()->noContent())->name('lgpd-consent.store');
-    Route::getRoutes()->refreshNameLookups();
+    registerLedgerRoute();
 }
 
 /**
@@ -16,25 +21,31 @@ function registerLgpdConsentRoute(): void
  *
  * @param  list<string>  $statuses  banner choices, in order
  * @param  list<int>  $responses  HTTP status per fetch call (default 204)
+ * @param  list<string>  $later  choices made once the first requests settle; the retry timers fire after them
  * @return array{calls: list<array{0: string, 1: array<string, mixed>}>, pending: string|null}
  */
-function runBodyScript(array $statuses, string $cookie = '', array $responses = [], ?string $pending = null): array
+function runBodyScript(array $statuses, string $cookie = '', array $responses = [], ?string $pending = null, string $key = 'lgpd_consent_pending', array $later = []): array
 {
     preg_match_all('/<script[^>]*>(.*?)<\/script>/s', view('cookie-consent::cookie-consent-body')->render(), $m);
 
     $js = 'var window = globalThis; var calls = []; var responses = '.json_encode($responses).';'
         .'var document = {cookie: '.json_encode($cookie).'};'
-        .'var store = {}; '.($pending ? 'store.lgpd_consent_pending = '.json_encode($pending).';' : '')
+        .'var store = {}; '.($pending ? 'store['.json_encode($key).'] = '.json_encode($pending).';' : '')
         .'window.localStorage = {getItem: function (k) { return k in store ? store[k] : null; },'
         .' setItem: function (k, v) { store[k] = v; }, removeItem: function (k) { delete store[k]; }};'
         .'window.fetch = function (url, init) { calls.push([url, init]); var s = responses.shift() || 204;'
         .' return Promise.resolve({ok: s < 300, status: s}); };'
         .'window.cookieConsentMode = function () {};'
         .'window.cookieconsent = {initialise: function (c) { window.cfg = c; }};'
+        // Retry timers (2s+) are held back and only fired, by hand, in the later phase.
+        .'var realTimeout = setTimeout, retries = []; window.setTimeout = function (f, ms) { return ms >= 1000 ? retries.push(f) : realTimeout(f, ms); };'
         .$m[1][1]
         .implode('', array_map(fn (string $s) => 'window.cfg.onStatusChange('.json_encode($s).');', $statuses))
-        // Let the promise chains settle, then stop before the 2s retry timers.
-        .'setTimeout(function () { console.log(JSON.stringify({calls: calls, pending: store.lgpd_consent_pending || null})); process.exit(0); }, 50);';
+        .($later === [] ? '' : 'realTimeout(function () { '
+            .implode('', array_map(fn (string $s) => 'window.cfg.onStatusChange('.json_encode($s).');', $later))
+            .'realTimeout(function () { retries.splice(0).forEach(function (f) { f(); }); }, 20); }, 20);')
+        // Let the promise chains settle, then stop.
+        .'realTimeout(function () { console.log(JSON.stringify({calls: calls, pending: store['.json_encode($key).'] || null})); process.exit(0); }, 80);';
 
     return json_decode((new Process(['node', '-e', $js]))->mustRun()->getOutput(), true);
 }
@@ -48,9 +59,11 @@ function grantedValues(array $result): array
     return array_map(fn (array $call) => json_decode($call[1]['body'], true)['granted'], $result['calls']);
 }
 
-it('does not post anywhere without laravel-lgpd-consent', function () {
+it('does not post anywhere without a privacy ledger package', function () {
     expect(view('cookie-consent::cookie-consent-body')->render())
         ->not->toContain('lgpd/consent')
+        ->not->toContain('gdpr/consent')
+        ->not->toContain('ccpa/opt-out')
         ->not->toContain('onStatusChange');
 });
 
@@ -59,7 +72,7 @@ it('posts banner choices to the lgpd consent ledger when its route exists', func
 
     expect(view('cookie-consent::cookie-consent-body')->render())
         ->toContain('onStatusChange')
-        ->toContain("'\/lgpd\/consent'")
+        ->toContain('lgpd_consent_pending')
         ->toContain("purpose: 'cookies'");
 });
 
@@ -104,7 +117,54 @@ describe('ledger requests (runs the script in Node)', function () {
             ->and($next['pending'])->toBeNull();
     });
 
+    it('does not resend a failed choice once a newer one replaced it', function () {
+        // allow fails and waits for its retry; deny comes and succeeds; the allow retry must not fire.
+        $result = runBodyScript(['allow'], responses: [500], later: ['deny']);
+
+        expect(grantedValues($result))->toBe([true, false])
+            ->and($result['pending'])->toBeNull()
+            ->and(grantedValues(runBodyScript(['allow'], responses: [500], later: [])))->toBe([true]);
+    });
+
     it('drops a choice the server rejects for good', function () {
         expect(runBodyScript(['allow'], responses: [422])['pending'])->toBeNull();
+    });
+});
+
+describe('gdpr and ccpa ledgers (runs the script in Node)', function () {
+    beforeEach(function () {
+        if ((new ExecutableFinder)->find('node') === null) {
+            $this->markTestSkipped('node is not installed');
+        }
+    });
+
+    it('records the choice as a cookies consent in laravel-gdpr-consent', function () {
+        registerLedgerRoute('gdpr/consent', 'gdpr-consent.store');
+
+        [[$url, $init]] = runBodyScript(['allow'], key: 'gdpr_consent_pending')['calls'];
+
+        expect($url)->toBe('/gdpr/consent')
+            ->and(json_decode($init['body'], true))->toBe(['purpose' => 'cookies', 'granted' => true])
+            ->and(runBodyScript(['allow'], responses: [500], key: 'gdpr_consent_pending')['pending'])->toBe('allow');
+    });
+
+    it('records deny as a sale and sharing opt-out in laravel-ccpa-opt-out', function () {
+        registerLedgerRoute('ccpa/opt-out', 'ccpa-opt-out.store');
+
+        [[$url, $init]] = runBodyScript(['deny'], key: 'ccpa_opt_out_pending')['calls'];
+
+        expect($url)->toBe('/ccpa/opt-out')
+            ->and(json_decode($init['body'], true))->toBe(['right' => 'sale_sharing', 'opted_out' => true])
+            ->and(json_decode(runBodyScript(['allow'], key: 'ccpa_opt_out_pending')['calls'][0][1]['body'], true))
+            ->toBe(['right' => 'sale_sharing', 'opted_out' => false]);
+    });
+
+    it('sends each choice to every ledger installed', function () {
+        registerLedgerRoute();
+        registerLedgerRoute('gdpr/consent', 'gdpr-consent.store');
+        registerLedgerRoute('ccpa/opt-out', 'ccpa-opt-out.store');
+
+        expect(array_column(runBodyScript(['allow'])['calls'], 0))
+            ->toBe(['/lgpd/consent', '/gdpr/consent', '/ccpa/opt-out']);
     });
 });
