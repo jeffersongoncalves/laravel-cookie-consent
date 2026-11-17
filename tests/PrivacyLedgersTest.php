@@ -21,9 +21,10 @@ function registerLgpdConsentRoute(): void
  *
  * @param  list<string>  $statuses  banner choices, in order
  * @param  list<int>  $responses  HTTP status per fetch call (default 204)
+ * @param  list<string>  $later  choices made once the first requests settle; the retry timers fire after them
  * @return array{calls: list<array{0: string, 1: array<string, mixed>}>, pending: string|null}
  */
-function runBodyScript(array $statuses, string $cookie = '', array $responses = [], ?string $pending = null, string $key = 'lgpd_consent_pending'): array
+function runBodyScript(array $statuses, string $cookie = '', array $responses = [], ?string $pending = null, string $key = 'lgpd_consent_pending', array $later = []): array
 {
     preg_match_all('/<script[^>]*>(.*?)<\/script>/s', view('cookie-consent::cookie-consent-body')->render(), $m);
 
@@ -36,10 +37,15 @@ function runBodyScript(array $statuses, string $cookie = '', array $responses = 
         .' return Promise.resolve({ok: s < 300, status: s}); };'
         .'window.cookieConsentMode = function () {};'
         .'window.cookieconsent = {initialise: function (c) { window.cfg = c; }};'
+        // Retry timers (2s+) are held back and only fired, by hand, in the later phase.
+        .'var realTimeout = setTimeout, retries = []; window.setTimeout = function (f, ms) { return ms >= 1000 ? retries.push(f) : realTimeout(f, ms); };'
         .$m[1][1]
         .implode('', array_map(fn (string $s) => 'window.cfg.onStatusChange('.json_encode($s).');', $statuses))
-        // Let the promise chains settle, then stop before the 2s retry timers.
-        .'setTimeout(function () { console.log(JSON.stringify({calls: calls, pending: store['.json_encode($key).'] || null})); process.exit(0); }, 50);';
+        .($later === [] ? '' : 'realTimeout(function () { '
+            .implode('', array_map(fn (string $s) => 'window.cfg.onStatusChange('.json_encode($s).');', $later))
+            .'realTimeout(function () { retries.splice(0).forEach(function (f) { f(); }); }, 20); }, 20);')
+        // Let the promise chains settle, then stop.
+        .'realTimeout(function () { console.log(JSON.stringify({calls: calls, pending: store['.json_encode($key).'] || null})); process.exit(0); }, 80);';
 
     return json_decode((new Process(['node', '-e', $js]))->mustRun()->getOutput(), true);
 }
@@ -109,6 +115,15 @@ describe('ledger requests (runs the script in Node)', function () {
 
         expect(grantedValues($next))->toBe([true])
             ->and($next['pending'])->toBeNull();
+    });
+
+    it('does not resend a failed choice once a newer one replaced it', function () {
+        // allow fails and waits for its retry; deny comes and succeeds; the allow retry must not fire.
+        $result = runBodyScript(['allow'], responses: [500], later: ['deny']);
+
+        expect(grantedValues($result))->toBe([true, false])
+            ->and($result['pending'])->toBeNull()
+            ->and(grantedValues(runBodyScript(['allow'], responses: [500], later: [])))->toBe([true]);
     });
 
     it('drops a choice the server rejects for good', function () {

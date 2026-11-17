@@ -107,7 +107,8 @@
                 } else if (done) {
                     store(null);
                 } else if (attempt < 2) {
-                    setTimeout(function () { send(status, attempt + 1); }, 2000 * (attempt + 1));
+                    // A newer choice may replace this one before the timer fires: then it is obsolete.
+                    setTimeout(function () { if (pending() === status) send(status, attempt + 1); }, 2000 * (attempt + 1));
                 }
                 // Still failing: stays pending and is retried on the next page load.
             });
