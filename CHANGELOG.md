@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## 4.5.0 - 2026-11-17
+
+### Banner choices in the GDPR and CCPA suites
+
+The banner already recorded allow and deny in laravel-lgpd-consent (4.4.0). It now does the same for:
+
+- **laravel-gdpr-consent** (`gdpr-consent.route.enabled`): consent under the purpose `cookies`, as proof of consent (GDPR Art. 7(1)).
+- **laravel-ccpa-opt-out** (`ccpa-opt-out.route.enabled`): deny opts out of the sale or sharing of personal information (`sale_sharing`), allow opts back in.
+
+With several installed, each choice goes to all of them, each with its own pending slot. Nothing changes unless one of these packages is installed with its endpoint enabled.
+
+### Fix
+
+- A failed choice waiting for its retry no longer gets resent after a newer choice was recorded, so the ledger always ends on the latest choice.
+
 ## 4.4.0 - 2026-11-16
 
 ### LGPD consent ledger integration
@@ -161,11 +176,13 @@ Drop Laravel 11 support (EOL, unpatched). Require `laravel/framework: ^12.61.1|^
    
    
    
+   
    ```
 2. Run migrations to create the settings in the database:
    
    ```bash
    php artisan migrate
+   
    
    
    
@@ -187,6 +204,7 @@ Drop Laravel 11 support (EOL, unpatched). Require `laravel/framework: ^12.61.1|^
    $settings->position = 'top-right';
    $settings->popup_background = '#000000';
    $settings->save();
+   
    
    
    
