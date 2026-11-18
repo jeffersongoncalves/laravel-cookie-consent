@@ -15,8 +15,8 @@ it('registers the settings class in the settings config', function () {
     expect(config('settings.settings'))->toContain(CookieConsentSettings::class);
 });
 
-it('registers all 25 settings keys via the migrations', function () {
-    expect(DB::table('settings')->where('group', 'cookie_consent')->count())->toBe(25);
+it('registers all 31 settings keys via the migrations', function () {
+    expect(DB::table('settings')->where('group', 'cookie_consent')->count())->toBe(31);
 });
 
 it('keeps the pre-consent-mode behaviour by default', function () {
