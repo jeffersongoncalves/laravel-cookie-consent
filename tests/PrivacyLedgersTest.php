@@ -130,7 +130,7 @@ describe('ledger requests (runs the script in Node)', function () {
     });
 });
 
-describe('gdpr and ccpa ledgers (runs the script in Node)', function () {
+describe('gdpr, quebec, ccpa and us-privacy ledgers (runs the script in Node)', function () {
     beforeEach(function () {
         if ((new ExecutableFinder)->find('node') === null) {
             $this->markTestSkipped('node is not installed');
@@ -158,12 +158,35 @@ describe('gdpr and ccpa ledgers (runs the script in Node)', function () {
             ->toBe(['right' => 'sale_sharing', 'opted_out' => false]);
     });
 
+    it('records the choice as a cookies consent in laravel-quebec-consent', function () {
+        registerLedgerRoute('quebec/consent', 'quebec-consent.store');
+
+        [[$url, $init]] = runBodyScript(['deny'], key: 'quebec_consent_pending')['calls'];
+
+        expect($url)->toBe('/quebec/consent')
+            ->and(json_decode($init['body'], true))->toBe(['purpose' => 'cookies', 'granted' => false]);
+    });
+
+    it('records deny as sale and targeted advertising opt-outs in laravel-us-privacy-opt-out', function () {
+        registerLedgerRoute('us-privacy/opt-out', 'us-privacy-opt-out.store');
+
+        $calls = runBodyScript(['deny'], key: 'us_privacy_opt_out_pending')['calls'];
+
+        expect(array_column($calls, 0))->toBe(['/us-privacy/opt-out', '/us-privacy/opt-out'])
+            ->and(array_map(fn (array $call) => json_decode($call[1]['body'], true), $calls))->toBe([
+                ['right' => 'sale', 'opted_out' => true],
+                ['right' => 'targeted_advertising', 'opted_out' => true],
+            ]);
+    });
+
     it('sends each choice to every ledger installed', function () {
         registerLedgerRoute();
         registerLedgerRoute('gdpr/consent', 'gdpr-consent.store');
+        registerLedgerRoute('quebec/consent', 'quebec-consent.store');
         registerLedgerRoute('ccpa/opt-out', 'ccpa-opt-out.store');
+        registerLedgerRoute('us-privacy/opt-out', 'us-privacy-opt-out.store');
 
         expect(array_column(runBodyScript(['allow'])['calls'], 0))
-            ->toBe(['/lgpd/consent', '/gdpr/consent', '/ccpa/opt-out']);
+            ->toBe(['/lgpd/consent', '/gdpr/consent', '/quebec/consent', '/ccpa/opt-out', '/us-privacy/opt-out', '/us-privacy/opt-out']);
     });
 });

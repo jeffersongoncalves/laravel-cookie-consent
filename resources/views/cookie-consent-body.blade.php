@@ -4,9 +4,11 @@
 @php($ledgers = collect([
     ['route' => 'lgpd-consent.store', 'key' => 'lgpd_consent_pending', 'kind' => 'consent'],
     ['route' => 'gdpr-consent.store', 'key' => 'gdpr_consent_pending', 'kind' => 'consent'],
-    ['route' => 'ccpa-opt-out.store', 'key' => 'ccpa_opt_out_pending', 'kind' => 'opt_out'],
+    ['route' => 'quebec-consent.store', 'key' => 'quebec_consent_pending', 'kind' => 'consent'],
+    ['route' => 'ccpa-opt-out.store', 'key' => 'ccpa_opt_out_pending', 'kind' => 'opt_out', 'rights' => ['sale_sharing']],
+    ['route' => 'us-privacy-opt-out.store', 'key' => 'us_privacy_opt_out_pending', 'kind' => 'opt_out', 'rights' => ['sale', 'targeted_advertising']],
 ])->filter(fn (array $ledger) => \Illuminate\Support\Facades\Route::has($ledger['route']))
-    ->map(fn (array $ledger) => ['url' => route($ledger['route'], absolute: false), 'key' => $ledger['key'], 'kind' => $ledger['kind']])
+    ->map(fn (array $ledger) => ['url' => route($ledger['route'], absolute: false), 'key' => $ledger['key'], 'kind' => $ledger['kind'], 'rights' => $ledger['rights'] ?? []])
     ->values()->all())
 @php($csrfToken = request()->hasSession() ? csrf_token() : null)
 @php($content = [
@@ -62,7 +64,7 @@
     @endif
     @if($ledgers !== [])
     // Record each choice in the privacy ledgers installed (laravel-lgpd-consent, laravel-gdpr-consent,
-    // laravel-ccpa-opt-out). Per ledger: one pending slot (latest choice wins) kept until the server
+    // laravel-quebec-consent, laravel-ccpa-opt-out, laravel-us-privacy-opt-out). Per ledger: one pending slot (latest choice wins) kept until the server
     // confirms, one request at a time, so the latest choice is always recorded last and survives
     // failures and reloads. A choice is "allow"/"deny" (banner mode) or a JSON {category: bool} map.
     var privacyLedgers = @js($ledgers).map(function (ledger) {
@@ -80,8 +82,11 @@
         function bodies(status) {
             var state = status === 'allow' || status === 'deny' ? null : JSON.parse(status);
             if (ledger.kind === 'opt_out') {
-                // CCPA: refusing cookies (or the marketing category) opts out of the sale or sharing of personal information.
-                return [{right: 'sale_sharing', opted_out: state ? !state.marketing : status !== 'allow'}];
+                // Refusing cookies (or the marketing category) opts out of the sale or sharing of personal
+                // information (CCPA) / of the sale and targeted advertising (US state laws).
+                var optedOut = state ? !state.marketing : status !== 'allow';
+
+                return ledger.rights.map(function (right) { return {right: right, opted_out: optedOut}; });
             }
             if (!state) return [{purpose: 'cookies', granted: status === 'allow'}];
 
