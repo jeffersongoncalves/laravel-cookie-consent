@@ -25,7 +25,7 @@
             : ['cookieconsent_status', $site, __('cookie-consent::policy.purposes.consent'), '1 year', 'necessary'],
     ];
 
-    foreach (['lgpd-consent' => 'lgpd_consent_id', 'gdpr-consent' => 'gdpr_consent_id', 'ccpa-opt-out' => 'ccpa_opt_out_id'] as $ledger => $cookie) {
+    foreach (['lgpd-consent' => 'lgpd_consent_id', 'gdpr-consent' => 'gdpr_consent_id', 'quebec-consent' => 'quebec_consent_id', 'ccpa-opt-out' => 'ccpa_opt_out_id', 'us-privacy-opt-out' => 'us_privacy_opt_out_id'] as $ledger => $cookie) {
         if (Route::has("{$ledger}.store")) {
             $rows[] = [(string) config("{$ledger}.route.cookie", $cookie), $site, __('cookie-consent::policy.purposes.ledger'), '13 months', 'necessary'];
         }

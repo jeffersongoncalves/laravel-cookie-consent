@@ -170,7 +170,7 @@ Include the head view **before** the Google Tag Manager or gtag snippet, so thei
 
 Works with [laravel-gtm](https://github.com/jeffersongoncalves/laravel-gtm) and [laravel-gtag](https://github.com/jeffersongoncalves/laravel-gtag), or any Google tag on the page. `type` defaults to `info` and `consent_mode` to `false`, so upgrading changes nothing until you opt in; run `php artisan migrate` after updating to add the two settings.
 
-## Privacy ledgers (LGPD, GDPR, CCPA)
+## Privacy ledgers (LGPD, GDPR, Quebec Law 25, CCPA, US state laws)
 
 Install one of the privacy packages below and enable its endpoint. From then on, the banner records every **allow** and **deny** there. A **dismiss** is not a choice, so nothing is recorded for it. You don't change any code in this package.
 
@@ -178,9 +178,11 @@ Install one of the privacy packages below and enable its endpoint. From then on,
 |---|---|---|
 | [laravel-lgpd-consent](https://github.com/jeffersongoncalves/laravel-lgpd-consent) | `lgpd-consent.route.enabled => true` | consent under the purpose `cookies`, as proof of consent (LGPD art. 8) |
 | [laravel-gdpr-consent](https://github.com/jeffersongoncalves/laravel-gdpr-consent) | `gdpr-consent.route.enabled => true` | consent under the purpose `cookies`, as proof of consent (GDPR Art. 7(1)) |
+| [laravel-quebec-consent](https://github.com/jeffersongoncalves/laravel-quebec-consent) | `quebec-consent.route.enabled => true` | consent under the purpose `cookies`, for the tracking technologies that must stay off until the person agrees (Law 25, s. 8.1) |
 | [laravel-ccpa-opt-out](https://github.com/jeffersongoncalves/laravel-ccpa-opt-out) | `ccpa-opt-out.route.enabled => true` | **deny** opts out of the sale or sharing of personal information (`sale_sharing`), **allow** opts back in |
+| [laravel-us-privacy-opt-out](https://github.com/jeffersongoncalves/laravel-us-privacy-opt-out) | `us-privacy-opt-out.route.enabled => true` | **deny** opts out of the sale of personal data (`sale`) and of targeted advertising (`targeted_advertising`), **allow** opts back in |
 
-If you configure `lgpd-consent.purposes` or `gdpr-consent.purposes`, add `cookies` to that list (in categories mode: `cookies_analytics`, `cookies_marketing` and `cookies_functionality`, one consent per category; for CCPA, refusing marketing is the opt-out). With several of them installed, each choice goes to all of them.
+If you configure `lgpd-consent.purposes`, `gdpr-consent.purposes` or `quebec-consent.purposes`, add `cookies` to that list (in categories mode: `cookies_analytics`, `cookies_marketing` and `cookies_functionality`, one consent per category; for the CCPA and the US state laws, refusing marketing is the opt-out). With several of them installed, each choice goes to all of them.
 
 The request sends the `XSRF-TOKEN` cookie, so it keeps working on cached pages. If that cookie is missing, it falls back to the page's CSRF token. The request uses `keepalive`, so it completes even when the visitor leaves the page right away.
 
