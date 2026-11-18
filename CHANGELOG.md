@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## 4.6.0 - 2026-11-17
+
+### Block scripts until consent
+
+`block_scripts` holds the scripts of the analytics and chat packages (`type="text/plain" data-category="…"`) until the visitor allows their category, then runs them with their CSP nonce, in page order (a library loads before its init script).
+
+| Category | Packages |
+|---|---|
+| analytics | gtag, clarity, hotjar, mixpanel, amplitude, matomo |
+| marketing | gtm, pixel |
+| functionality | crisp, tawk-to |
+| never blocked (no cookies) | plausible, fathom, simple-analytics, pirsch, cloudflare-web-analytics, goatcounter, umami |
+
+Google tags are left to Consent Mode when `consent_mode` is on; `script_categories` overrides a category. The packages need their next minor (they ask for the attributes through `cookie_consent_script_attributes()` behind `function_exists()`).
+
+### A choice per category
+
+`mode = categories` shows a preferences banner (vanilla-cookieconsent 3.1.0): Accept all, Reject all and a toggle per category in use. Consent Mode follows each category (analytics_storage / ad signals) and the privacy ledgers get one consent per category (`cookies_analytics`, `cookies_marketing`, `cookies_functionality`; CCPA: refusing marketing is the opt-out).
+
+### Global Privacy Control
+
+`honor_gpc` refuses the marketing category and the Consent Mode ad signals on a GPC signal.
+
+### Cookie policy
+
+`@include('cookie-consent::policy')` renders the cookie table of your cookie policy from the packages installed, grouped by category, translated, lifetimes in the app locale; add your own rows with `cookies`.
+
+Every new setting is off: run `php artisan migrate` after updating. 24 locales for the new texts.
+
 ## 4.5.0 - 2026-11-17
 
 ### Banner choices in the GDPR and CCPA suites
@@ -177,11 +206,13 @@ Drop Laravel 11 support (EOL, unpatched). Require `laravel/framework: ^12.61.1|^
    
    
    
+   
    ```
 2. Run migrations to create the settings in the database:
    
    ```bash
    php artisan migrate
+   
    
    
    
@@ -204,6 +235,7 @@ Drop Laravel 11 support (EOL, unpatched). Require `laravel/framework: ^12.61.1|^
    $settings->position = 'top-right';
    $settings->popup_background = '#000000';
    $settings->save();
+   
    
    
    
