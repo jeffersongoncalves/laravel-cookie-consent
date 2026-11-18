@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 4.7.0 - 2026-11-18
+
+### Features
+
+- The banner records every choice in two more privacy ledgers when they are installed with their route enabled:
+  - `laravel-quebec-consent`: consent under the purpose `cookies` (`cookies_<category>` in categories mode).
+  - `laravel-us-privacy-opt-out`: deny (or refusing marketing) opts out of `sale` and `targeted_advertising`; allow opts back in.
+  
+- The cookie policy lists the visitor cookies of both ledgers.
+
 ## 4.6.0 - 2026-11-17
 
 ### Block scripts until consent
@@ -207,11 +217,13 @@ Drop Laravel 11 support (EOL, unpatched). Require `laravel/framework: ^12.61.1|^
    
    
    
+   
    ```
 2. Run migrations to create the settings in the database:
    
    ```bash
    php artisan migrate
+   
    
    
    
@@ -235,6 +247,7 @@ Drop Laravel 11 support (EOL, unpatched). Require `laravel/framework: ^12.61.1|^
    $settings->position = 'top-right';
    $settings->popup_background = '#000000';
    $settings->save();
+   
    
    
    
