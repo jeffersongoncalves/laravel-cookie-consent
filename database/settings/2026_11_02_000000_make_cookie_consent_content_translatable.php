@@ -1,6 +1,7 @@
 <?php
 
 use JeffersonGoncalves\CookieConsent\Settings\CookieConsentSettings;
+use Spatie\LaravelSettings\Exceptions\MissingSettings;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 use Spatie\LaravelSettings\Support\SettingsCacheFactory;
 
@@ -30,7 +31,13 @@ return new class extends SettingsMigration
         $cache = app(SettingsCacheFactory::class)->build(CookieConsentSettings::repository());
 
         if ($cache->isEnabled()) {
-            $cache->put(new CookieConsentSettings);
+            try {
+                $cache->put(new CookieConsentSettings);
+            } catch (MissingSettings) {
+                // Fresh install: the class already declares properties a later migration adds,
+                // so it can't load yet. Drop the cached copy; that migration caches a fresh one.
+                $cache->clear();
+            }
         }
 
         app()->forgetInstance(CookieConsentSettings::class);
